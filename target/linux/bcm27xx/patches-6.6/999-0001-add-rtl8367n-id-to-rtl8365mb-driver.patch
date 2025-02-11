@@ -1,0 +1,16 @@
+--- a/drivers/net/dsa/realtek/rtl8365mb.c
++++ b/drivers/net/dsa/realtek/rtl8365mb.c
+@@ -545,6 +545,13 @@ static const struct rtl8365mb_chip_info
+ 		.jam_size = ARRAY_SIZE(rtl8365mb_init_jam_8365mb_vc),
+ 	},
+ 	{
++		.name = "RTL8367N",
++		.chip_id = 0x6367,
++		.chip_ver = 0x0030,
++		.jam_table = rtl8365mb_init_jam_8365mb_vc,
++		.jam_size = ARRAY_SIZE(rtl8365mb_init_jam_8365mb_vc),
++	},
++	{
+ 		.name = "RTL8367RB-VB",
+ 		.chip_id = 0x6367,
+ 		.chip_ver = 0x0020,

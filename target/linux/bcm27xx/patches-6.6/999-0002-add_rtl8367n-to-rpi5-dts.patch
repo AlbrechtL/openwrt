@@ -1,0 +1,87 @@
+--- a/arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dts
++++ b/arch/arm64/boot/dts/broadcom/bcm2712-rpi-5-b.dts
+@@ -161,6 +161,84 @@
+ 
+ 	i2c0if: i2c0if {};
+ 	i2c0mux: i2c0mux {};
++	
++	switch: switch {
++		compatible = "realtek,rtl8365mb";
++		mdc-gpios = <&gpio 17 GPIO_ACTIVE_HIGH>; // GPIO17
++		mdio-gpios = <&gpio 27 GPIO_ACTIVE_HIGH>; // GPIO27
++		reset-gpios = <&gpio 22 GPIO_ACTIVE_LOW>; // GPIO22
++		realtek,disable-leds;
++
++		mdio {
++			compatible = "realtek,smi-mdio";
++			#address-cells = <1>;
++			#size-cells = <0>;
++
++			ethphy0: ethernet-phy@0 {
++				reg = <0>;
++			};
++
++			ethphy1: ethernet-phy@1 {
++				reg = <1>;
++			};
++
++			ethphy2: ethernet-phy@2 {
++				reg = <2>;
++			};
++
++			ethphy3: ethernet-phy@3 {
++				reg = <3>;
++			};
++
++			ethphy4: ethernet-phy@4 {
++				reg = <4>;
++			};
++		};
++
++		ports {
++			#address-cells = <1>;
++			#size-cells = <0>;
++
++			port@0 {
++				reg = <0>;
++				//label = "lan0";
++				//phy-handle = <&ethphy0>;
++				label = "cpu";
++				ethernet = <&rp1_eth>;
++				phy-mode = "gmii";
++
++				fixed-link {
++					speed = <1000>;
++					full-duplex;
++					//pause;
++				};
++			};
++
++			port@1 {
++				reg = <1>;
++				label = "lan1";
++				phy-handle = <&ethphy1>;
++			};
++
++			port@2 {
++				reg = <2>;
++				label = "lan2";
++				phy-handle = <&ethphy2>;
++			};
++
++			port@3 {
++				reg = <3>;
++				label = "lan3";
++				phy-handle = <&ethphy3>;
++			};
++
++			port@4 {
++				reg = <4>;
++				label = "lan4";
++				phy-handle = <&ethphy4>;
++			};
++		};
++	};
+ };
+ 
+ rp1_target: &pcie2 {
