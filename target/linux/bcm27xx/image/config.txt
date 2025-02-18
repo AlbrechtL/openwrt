@@ -12,3 +12,12 @@ include distroconfig.txt
 
 [all]
 # Place your custom settings here.
+
+# For switch
+dtparam=spi=on
+dtoverlay=rtl8365mb-enc28j60-switch
+
+# For UART
+dtparam=uart0
+dtparam=uart0_console
+enable_rp1_uart=1
