@@ -1,6 +1,25 @@
 --- a/drivers/net/phy/rtl8367b.c
 +++ b/drivers/net/phy/rtl8367b.c
-@@ -1517,6 +1517,12 @@ static int rtl8367b_detect(struct rtl836
+@@ -785,6 +785,8 @@ static int rtl8367b_extif_init_of(struct
+ 
+ 	cpu_port = be32_to_cpup(prop++);
+ 	switch (cpu_port) {
++	case RTL8367B_CPU_PORT_NUM - 2: // Hack for RPi managed switch: Allow usage of port 3
++	case RTL8367B_CPU_PORT_NUM - 1: // Hack for RPi managed switch: Allow usage of port 4
+ 	case RTL8367B_CPU_PORT_NUM:
+ 	case RTL8367B_CPU_PORT_NUM + 1:
+ 	case RTL8367B_CPU_PORT_NUM + 2:
+@@ -805,7 +807,8 @@ static int rtl8367b_extif_init_of(struct
+ 				goto err_init;
+ 			}
+ 		} else {
+-			id = cpu_port - RTL8367B_CPU_PORT_NUM;
++			//id = cpu_port - RTL8367B_CPU_PORT_NUM;
++			id = 0; // Hack for RPi managed switch: Force always to ethif0
+ 		}
+ 		if (smi->cpu_port == UINT_MAX) {
+ 			dev_info(smi->parent, "cpu_port:%u, assigned to extif%u\n", cpu_port, id);
+@@ -1517,6 +1520,12 @@ static int rtl8367b_detect(struct rtl836
  			smi->rtl8367b_chip = RTL8367B_CHIP_RTL8367S;
  		}
  		break;
