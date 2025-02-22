@@ -15,7 +15,9 @@ include distroconfig.txt
 
 # For switch
 dtparam=spi=on
-dtoverlay=rtl8365mb-enc28j60-switch
+#dtoverlay=rtl8365mb-enc28j60-switch
+dtoverlay=enc28j60
+dtoverlay=rtl8367b-switch
 
 # For UART
 dtparam=uart0

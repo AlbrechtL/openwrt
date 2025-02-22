@@ -1,0 +1,36 @@
+--- /dev/null
++++ b/arch/arm/boot/dts/overlays/rtl8367b-switch-overlay.dts
+@@ -0,0 +1,23 @@
++// Overlay for the Realtek RTL8367 Ethernet switch controller family
++/dts-v1/;
++/plugin/;
++
++#include <dt-bindings/gpio/gpio.h>
++
++/ {
++	compatible = "brcm,bcm2835";
++
++	fragment@0 {
++		target-path = "/";
++
++		__overlay__ {
++			rtl8367 {
++				compatible = "realtek,rtl8367b";
++				pinctrl-names = "default";
++				gpio-sda = <&gpio 27 GPIO_ACTIVE_HIGH>; // GPIO27
++				gpio-sck = <&gpio 17 GPIO_ACTIVE_HIGH>; // GPIO17
++				realtek,extif = <3 1 0 1 1 1 1 1 1 2>;
++			};
++		};
++	};
++};
+--- a/arch/arm/boot/dts/overlays/Makefile
++++ b/arch/arm/boot/dts/overlays/Makefile
+@@ -241,6 +241,7 @@ dtbo-$(CONFIG_ARCH_BCM2835) += \
+ 	rpi-tv.dtbo \
+ 	rra-digidac1-wm8741-audio.dtbo \
+ 	rtl8365mb-enc28j60-switch.dtbo \
++	rtl8367b-switch.dtbo \
+ 	sainsmart18.dtbo \
+ 	sc16is750-i2c.dtbo \
+ 	sc16is750-spi0.dtbo \
