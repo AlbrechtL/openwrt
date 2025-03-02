@@ -103,8 +103,17 @@
 +
 +					port@0 {
 +						reg = <0>;
-+						label = "lan0";
-+						phy-handle = <&ethphy0>;
++						//label = "lan0";
++						//phy-handle = <&ethphy0>;
++						label = "cpu";
++						ethernet = <&eth1>;
++						phy-mode = "internal";
++
++						fixed-link {
++							speed = <10>;
++							half-duplex;
++							//pause;
++						};
 +					};
 +
 +					port@1 {
@@ -121,24 +130,15 @@
 +
 +					port@3 {
 +						reg = <3>;
-+						//label = "lan3";
-+						//phy-handle = <&ethphy3>;
-+						label = "cpu";
-+						ethernet = <&eth1>;
-+						phy-mode = "internal";
-+
-+						fixed-link {
-+							speed = <10>;
-+							half-duplex;
-+							//pause;
-+						};
++						label = "lan3";
++						phy-handle = <&ethphy3>;
 +					};
 +
-+					//port@4 {
-+					//	reg = <4>;
-+					//	label = "lan4";
-+					//	phy-handle = <&ethphy4>;
-+					//};
++					port@4 {
++						reg = <4>;
++						label = "lan4";
++						phy-handle = <&ethphy4>;
++					};
 +				};
 +			};
 +		};

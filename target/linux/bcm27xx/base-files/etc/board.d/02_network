@@ -45,7 +45,7 @@ lan_mac=$mac_123:$mac_456
 if grep -sq DEVTYPE=dsa /sys/class/net/*/uevent; then 
 	# DSA is not up when running this script, so we use a hard coded list as workaround
 	#lan_list=$(ls -1 -v -d /sys/class/net/lan* | xargs -n1 basename | xargs)
-	lan_list="lan0 lan1 lan2"
+	lan_list="lan1 lan2 lan3 lan4"
 
 	ucidef_set_bridge_device switch
 	ucidef_set_interface_lan "$lan_list"
@@ -64,7 +64,7 @@ else # Expect swconfig
 	#ucidef_set_bridge_mac "$lan_mac"
 	#ucidef_set_interface_lan "eth0"
 
-	ucidef_add_switch "switch0" "0:lan" "1:lan" "2:lan" "3@eth0"
+	ucidef_add_switch "switch0" "1:lan" "2:lan" "3:lan" "4:lan" "0@eth0"
 fi
 
 board_config_flush

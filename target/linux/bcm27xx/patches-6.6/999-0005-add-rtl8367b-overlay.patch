@@ -19,7 +19,7 @@
 +				pinctrl-names = "default";
 +				gpio-sda = <&gpio 27 GPIO_ACTIVE_HIGH>; // GPIO27
 +				gpio-sck = <&gpio 17 GPIO_ACTIVE_HIGH>; // GPIO17
-+				realtek,extif = <3 1 0 1 1 1 1 1 1 2>;
++				realtek,extif = <0 1 0 1 1 1 1 1 1 2>;
 +			};
 +		};
 +	};
