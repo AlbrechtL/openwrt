@@ -56,7 +56,6 @@ if grep -sq DEVTYPE=dsa /sys/class/net/*/uevent; then
 	[ -z "$lan_mac_start" ] && lan_mac_start=$lan_mac
 	for lan in $lan_list; do
 		ucidef_set_network_device_mac $lan $lan_mac_start
-		[ -z "$lan_mac_end" ] || [ "$lan_mac_start" == "$lan_mac_end" ] && lan_mac_start=$(macaddr_setbit_la $lan_mac_start)
 		lan_mac_start=$(macaddr_add $lan_mac_start 1)
 	done
 else # Expect swconfig
