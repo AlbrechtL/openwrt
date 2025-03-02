@@ -5,10 +5,7 @@
  	cpu_port = be32_to_cpup(prop++);
  	switch (cpu_port) {
 +	case RTL8367B_CPU_PORT_NUM - 5: // Hack for RPi managed switch: Allow usage of port 0
-+	case RTL8367B_CPU_PORT_NUM - 4: // Hack for RPi managed switch: Allow usage of port 1
-+	case RTL8367B_CPU_PORT_NUM - 3: // Hack for RPi managed switch: Allow usage of port 2
 +	case RTL8367B_CPU_PORT_NUM - 2: // Hack for RPi managed switch: Allow usage of port 3
-+	case RTL8367B_CPU_PORT_NUM - 1: // Hack for RPi managed switch: Allow usage of port 4
  	case RTL8367B_CPU_PORT_NUM:
  	case RTL8367B_CPU_PORT_NUM + 1:
  	case RTL8367B_CPU_PORT_NUM + 2:
