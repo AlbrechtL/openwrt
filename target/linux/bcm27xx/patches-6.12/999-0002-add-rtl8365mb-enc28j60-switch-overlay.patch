@@ -1,0 +1,152 @@
+--- a/arch/arm64/boot/dts/overlays/Makefile
++++ b/arch/arm64/boot/dts/overlays/Makefile
+@@ -240,6 +240,7 @@ dtbo-$(CONFIG_ARCH_BCM2835) += \
+ 	rpi-sense-v2.dtbo \
+ 	rpi-tv.dtbo \
+ 	rra-digidac1-wm8741-audio.dtbo \
++	rtl8365mb-enc28j60-switch.dtbo \
+ 	sainsmart18.dtbo \
+ 	sc16is750-i2c.dtbo \
+ 	sc16is750-spi0.dtbo \
+--- /dev/null
++++ b/arch/arm64/boot/dts/overlays/rtl8365mb-enc28j60-switch-overlay.dts
+@@ -0,0 +1,139 @@
++// Overlay for the Microchip ENC28J60 Ethernet Controller and the RTL8364 Switch Family ASICs
++/dts-v1/;
++/plugin/;
++
++#include <dt-bindings/gpio/gpio.h>
++
++/ {
++	compatible = "brcm,bcm2835";
++
++	fragment@0 {
++		target = <&spi0>;
++		__overlay__ {
++			/* needed to avoid dtc warning */
++			#address-cells = <1>;
++			#size-cells = <0>;
++
++			status = "okay";
++
++			eth1: enc28j60@0{
++				compatible = "microchip,enc28j60";
++				reg = <0>; /* CE0 */
++				pinctrl-names = "default";
++				pinctrl-0 = <&eth1_pins>;
++				interrupt-parent = <&gpio>;
++				interrupts = <25 0x2>; /* falling edge */
++				spi-max-frequency = <12000000>;
++				status = "okay";
++			};
++		};
++	};
++
++	fragment@1 {
++		target = <&spidev0>;
++		__overlay__ {
++			status = "disabled";
++		};
++	};
++
++	fragment@2 {
++		target = <&gpio>;
++		__overlay__ {
++			eth1_pins: eth1_pins {
++				brcm,pins = <25>;
++				brcm,function = <0>; /* in */
++				brcm,pull = <0>; /* none */
++			};
++		};
++	};
++
++	fragment@3 {
++		target-path = "/";
++
++		__overlay__ {
++			switch: switch {
++				compatible = "realtek,rtl8365mb";
++				mdc-gpios = <&gpio 17 GPIO_ACTIVE_HIGH>; // GPIO17
++				mdio-gpios = <&gpio 27 GPIO_ACTIVE_HIGH>; // GPIO27
++				reset-gpios = <&gpio 22 GPIO_ACTIVE_LOW>; // GPIO22
++				realtek,disable-leds;
++
++				mdio {
++					compatible = "realtek,smi-mdio";
++					#address-cells = <1>;
++					#size-cells = <0>;
++
++					ethphy0: ethernet-phy@0 {
++						reg = <0>;
++					};
++
++					ethphy1: ethernet-phy@1 {
++						reg = <1>;
++					};
++
++					ethphy2: ethernet-phy@2 {
++						reg = <2>;
++					};
++
++					ethphy3: ethernet-phy@3 {
++						reg = <3>;
++					};
++
++					ethphy4: ethernet-phy@4 {
++						reg = <4>;
++					};
++				};
++
++				ports {
++					#address-cells = <1>;
++					#size-cells = <0>;
++
++					port@0 {
++						reg = <0>;
++						//label = "lan0";
++						//phy-handle = <&ethphy0>;
++						label = "cpu";
++						ethernet = <&eth1>;
++						phy-mode = "internal";
++
++						fixed-link {
++							speed = <10>;
++							half-duplex;
++							//pause;
++						};
++					};
++
++					port@1 {
++						reg = <1>;
++						label = "lan1";
++						phy-handle = <&ethphy1>;
++					};
++
++					port@2 {
++						reg = <2>;
++						label = "lan2";
++						phy-handle = <&ethphy2>;
++					};
++
++					port@3 {
++						reg = <3>;
++						label = "lan3";
++						phy-handle = <&ethphy3>;
++					};
++
++					port@4 {
++						reg = <4>;
++						label = "lan4";
++						phy-handle = <&ethphy4>;
++					};
++				};
++			};
++		};
++	};
++
++	__overrides__ {
++		int_pin = <&eth1>, "interrupts:0",
++		          <&eth1_pins>, "brcm,pins:0";
++		speed   = <&eth1>, "spi-max-frequency:0";
++	};
++};

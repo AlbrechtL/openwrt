@@ -12,3 +12,8 @@ include distroconfig.txt
 
 [all]
 # Place your custom settings here.
+
+# For rpi-managed-switch-openwrt
+dtparam=spi=on
+#dtoverlay=enc28j60
+dtoverlay=rtl8365mb-enc28j60-switch
