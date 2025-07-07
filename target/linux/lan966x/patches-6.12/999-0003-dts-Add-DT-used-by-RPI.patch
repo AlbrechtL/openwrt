@@ -1,0 +1,2371 @@
+From 5bf7c2903ec9d5d48135491df3c14ea8b2a34bf8 Mon Sep 17 00:00:00 2001
+From: Horatiu Vultur <horatiu.vultur@microchip.com>
+Date: Wed, 3 Jan 2024 09:10:45 +0100
+Subject: [PATCH] dts: Add DT used by RPI
+
+---
+ arch/arm/boot/dts/broadcom/Makefile           |   2 +
+ .../broadcom/bcm2711-microchip-pcb8309.dts    | 687 +++++++++++++++
+ .../dts/broadcom/bcm2711-rpi-cm4-lan966x.dts  | 459 +++++++++++
+ .../dts/broadcom/bcm2711-rpi-cm4-pci.dtsi     | 317 +++++++
+ arch/arm/boot/dts/broadcom/bcm2711.dtsi       |   6 +-
+ arch/arm64/boot/dts/broadcom/Makefile         |   3 +
+ .../dts/broadcom/bcm2711-rpi-cm4-lan966x.dts  |   1 +
+ .../dts/broadcom/bcm2711-rpi-cm4-lan969x.dts  | 779 ++++++++++++++++++
+ .../boot/dts/broadcom/microchip/Makefile      |   2 +
+ .../microchip/bcm2711-microchip-pcb8309.dts   |   1 +
+ 10 files changed, 2254 insertions(+), 3 deletions(-)
+ create mode 100644 arch/arm/boot/dts/broadcom/bcm2711-microchip-pcb8309.dts
+ create mode 100644 arch/arm/boot/dts/broadcom/bcm2711-rpi-cm4-lan966x.dts
+ create mode 100644 arch/arm/boot/dts/broadcom/bcm2711-rpi-cm4-pci.dtsi
+ create mode 100644 arch/arm64/boot/dts/broadcom/bcm2711-rpi-cm4-lan966x.dts
+ create mode 100644 arch/arm64/boot/dts/broadcom/bcm2711-rpi-cm4-lan969x.dts
+ create mode 100644 arch/arm64/boot/dts/broadcom/microchip/Makefile
+ create mode 100644 arch/arm64/boot/dts/broadcom/microchip/bcm2711-microchip-pcb8309.dts
+
+diff --git a/arch/arm/boot/dts/broadcom/Makefile b/arch/arm/boot/dts/broadcom/Makefile
+index 5881bcc95eba..98bb4dadeef0 100644
+--- a/arch/arm/boot/dts/broadcom/Makefile
++++ b/arch/arm/boot/dts/broadcom/Makefile
+@@ -33,6 +33,8 @@ dtb-$(CONFIG_ARCH_BCM2835) += \
+ 	bcm2711-rpi-400.dtb \
+ 	bcm2711-rpi-4-b.dtb \
+ 	bcm2711-rpi-cm4-io.dtb \
++	bcm2711-rpi-cm4-lan966x.dtb \
++	bcm2711-rpi-cm4-lan969x.dtb \
+ 	bcm2835-rpi-zero.dtb \
+ 	bcm2835-rpi-zero-w.dtb
+ dtb-$(CONFIG_ARCH_BCMBCA) += \
+diff --git a/arch/arm/boot/dts/broadcom/bcm2711-microchip-pcb8309.dts b/arch/arm/boot/dts/broadcom/bcm2711-microchip-pcb8309.dts
+new file mode 100644
+index 000000000000..06ae525a84b5
+--- /dev/null
++++ b/arch/arm/boot/dts/broadcom/bcm2711-microchip-pcb8309.dts
+@@ -0,0 +1,687 @@
++// SPDX-License-Identifier: GPL-2.0
++/dts-v1/;
++#include "bcm2711.dtsi"
++#include "bcm2835-rpi.dtsi"
++
++#include <dt-bindings/reset/raspberrypi,firmware-reset.h>
++
++#include <dt-bindings/phy/phy-lan966x-serdes.h>
++#include <dt-bindings/mfd/atmel-flexcom.h>
++#include <dt-bindings/clock/microchip,lan966x.h>
++
++/ {
++	compatible = "raspberrypi,4-compute-module", "brcm,bcm2711";
++	model = "Raspberry Pi Compute Module 4";
++
++	chosen {
++		/* 8250 auxiliary UART instead of pl011 */
++		stdout-path = "serial1:115200n8";
++	};
++
++	/* Will be filled by the bootloader */
++	memory@0 {
++		device_type = "memory";
++		reg = <0 0 0>;
++	};
++
++	aliases {
++		emmc2bus = &emmc2bus;
++		pcie0 = &pcie0;
++		blconfig = &blconfig;
++		i2c102 = &i2c102;
++		i2c103 = &i2c103;
++	};
++
++	leds {
++		act {
++			gpios = <&gpio 42 GPIO_ACTIVE_HIGH>;
++		};
++
++		pwr {
++			label = "PWR";
++			gpios = <&expgpio 2 GPIO_ACTIVE_LOW>;
++			default-state = "keep";
++			linux,default-trigger = "default-on";
++		};
++	};
++
++	wifi_pwrseq: wifi-pwrseq {
++		compatible = "mmc-pwrseq-simple";
++		reset-gpios = <&expgpio 1 GPIO_ACTIVE_LOW>;
++	};
++
++	sd_io_1v8_reg: sd_io_1v8_reg {
++		compatible = "regulator-gpio";
++		regulator-name = "vdd-sd-io";
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <3300000>;
++		regulator-boot-on;
++		regulator-always-on;
++		regulator-settling-time-us = <5000>;
++		gpios = <&expgpio 4 GPIO_ACTIVE_HIGH>;
++		states = <1800000 0x1
++			  3300000 0x0>;
++		status = "okay";
++	};
++
++	sd_vcc_reg: sd_vcc_reg {
++		compatible = "regulator-fixed";
++		regulator-name = "vcc-sd";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		regulator-boot-on;
++		enable-active-high;
++		gpio = <&expgpio 6 GPIO_ACTIVE_HIGH>;
++	};
++};
++
++&ddc0 {
++	status = "okay";
++};
++
++&ddc1 {
++	status = "okay";
++};
++
++&firmware {
++	firmware_clocks: clocks {
++		compatible = "raspberrypi,firmware-clocks";
++		#clock-cells = <1>;
++	};
++
++	expgpio: gpio {
++		compatible = "raspberrypi,firmware-gpio";
++		gpio-controller;
++		#gpio-cells = <2>;
++		gpio-line-names = "BT_ON",
++				  "WL_ON",
++				  "PWR_LED_OFF",
++				  "ANT1",
++				  "VDD_SD_IO_SEL",
++				  "CAM_GPIO",
++				  "SD_PWR_ON",
++				  "ANT2";
++		status = "okay";
++
++		ant1: ant1 {
++			gpio-hog;
++			gpios = <3 GPIO_ACTIVE_HIGH>;
++			output-high;
++		};
++
++		ant2: ant2 {
++			gpio-hog;
++			gpios = <7 GPIO_ACTIVE_HIGH>;
++			output-low;
++		};
++	};
++
++	reset: reset {
++		compatible = "raspberrypi,firmware-reset";
++		#reset-cells = <1>;
++	};
++};
++
++&gpio {
++	/*
++	 * Parts taken from rpi_SCH_4b_4p0_reduced.pdf and
++	 * the official GPU firmware DT blob.
++	 *
++	 * Legend:
++	 * "FOO" = GPIO line named "FOO" on the schematic
++	 * "FOO_N" = GPIO line named "FOO" on schematic, active low
++	 */
++	gpio-line-names = "ID_SDA",
++			  "ID_SCL",
++			  "SDA1",
++			  "SCL1",
++			  "GPIO_GCLK",
++			  "GPIO5",
++			  "GPIO6",
++			  "SPI_CE1_N",
++			  "SPI_CE0_N",
++			  "SPI_MISO",
++			  "SPI_MOSI",
++			  "SPI_SCLK",
++			  "GPIO12",
++			  "GPIO13",
++			  /* Serial port */
++			  "TXD1",
++			  "RXD1",
++			  "GPIO16",
++			  "GPIO17",
++			  "GPIO18",
++			  "GPIO19",
++			  "GPIO20",
++			  "GPIO21",
++			  "GPIO22",
++			  "GPIO23",
++			  "GPIO24",
++			  "GPIO25",
++			  "GPIO26",
++			  "GPIO27",
++			  "RGMII_MDIO",
++			  "RGMIO_MDC",
++			  /* Used by BT module */
++			  "CTS0",
++			  "RTS0",
++			  "TXD0",
++			  "RXD0",
++			  /* Used by Wifi */
++			  "SD1_CLK",
++			  "SD1_CMD",
++			  "SD1_DATA0",
++			  "SD1_DATA1",
++			  "SD1_DATA2",
++			  "SD1_DATA3",
++			  /* Shared with SPI flash */
++			  "PWM0_MISO",
++			  "PWM1_MOSI",
++			  "STATUS_LED_G_CLK",
++			  "SPIFLASH_CE_N",
++			  "SDA0",
++			  "SCL0",
++			  "RGMII_RXCLK",
++			  "RGMII_RXCTL",
++			  "RGMII_RXD0",
++			  "RGMII_RXD1",
++			  "RGMII_RXD2",
++			  "RGMII_RXD3",
++			  "RGMII_TXCLK",
++			  "RGMII_TXCTL",
++			  "RGMII_TXD0",
++			  "RGMII_TXD1",
++			  "RGMII_TXD2",
++			  "RGMII_TXD3";
++};
++
++&hdmi0 {
++	clocks = <&firmware_clocks 13>, <&firmware_clocks 14>, <&dvp 0>, <&clk_27MHz>;
++	clock-names = "hdmi", "bvb", "audio", "cec";
++	status = "okay";
++};
++
++&hdmi1 {
++	clocks = <&firmware_clocks 13>, <&firmware_clocks 14>, <&dvp 1>, <&clk_27MHz>;
++	clock-names = "hdmi", "bvb", "audio", "cec";
++	status = "okay";
++};
++
++&hvs {
++	clocks = <&firmware_clocks 4>;
++};
++
++&pixelvalve0 {
++	status = "okay";
++};
++
++&pixelvalve1 {
++	status = "okay";
++};
++
++&pixelvalve2 {
++	status = "okay";
++};
++
++&pixelvalve4 {
++	status = "okay";
++};
++
++&pwm1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pwm1_0_gpio40 &pwm1_1_gpio41>;
++	status = "okay";
++};
++
++&rmem {
++	/*
++	 * RPi4's co-processor will copy the board's bootloader configuration
++	 * into memory for the OS to consume. It'll also update this node with
++	 * its placement information.
++	 */
++	blconfig: nvram@0 {
++		compatible = "raspberrypi,bootloader-config", "nvmem-rmem";
++		#address-cells = <1>;
++		#size-cells = <1>;
++		reg = <0x0 0x0 0x0>;
++		no-map;
++		status = "disabled";
++	};
++};
++
++/* SDHCI is used to control the SDIO for wireless */
++&sdhci {
++	#address-cells = <1>;
++	#size-cells = <0>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&emmc_gpio34>;
++	bus-width = <4>;
++	non-removable;
++	mmc-pwrseq = <&wifi_pwrseq>;
++	status = "okay";
++
++	brcmf: wifi@1 {
++		reg = <1>;
++		compatible = "brcm,bcm4329-fmac";
++	};
++};
++
++/* EMMC2 is used to drive the EMMC card */
++&emmc2 {
++	bus-width = <8>;
++	vqmmc-supply = <&sd_io_1v8_reg>;
++	vmmc-supply = <&sd_vcc_reg>;
++	broken-cd;
++	status = "okay";
++};
++
++&pcie0 {
++	pci@0,0 {
++		#address-cells = <3>;
++		#size-cells = <2>;
++		device_type = "pci";
++
++		reg = <0 0 0 0 0>;
++		ranges = <0x00000000 0x6 0x00000000  0x02000000 0x0 0xc0000000  0x0 0x40000000>;
++
++		lan966x: switch@0,0 {
++			compatible = "pci1055,9660";
++
++			reg = <0x0000 0 0 0 0>;
++			#address-cells = <1>;
++			#size-cells = <1>;
++
++			ranges = <0x00000000 0x0000000 0x6 0x00000000 0x40000000>;
++
++			#interrupt-cells = <1>;
++			interrupt-controller;
++			interrupt-parent = <&lan966x>;
++
++			clocks {
++				cpu_clk: cpu_clk {
++					compatible = "fixed-clock";
++					#clock-cells = <0>;
++					clock-frequency = <600000000>;  // CPU clock = 600MHz
++				};
++
++				fabric_clk: fabric_clk {
++					compatible = "fixed-clock";
++					#clock-cells = <0>;
++					clock-frequency = <30000000>;  // Fabric clock = 30MHz
++				};
++
++				sys_clk: sys_clk {
++					compatible = "fixed-clock";
++					#clock-cells = <0>;
++					clock-frequency = <15625000>;  // System clock = 15.625MHz
++				};
++
++				nic_clk: nic_clk {
++					compatible = "fixed-clock";
++					#clock-cells = <0>;
++					clock-frequency = <200000000>;  // NIC clock = 200MHz
++				};
++			};
++
++			cpu_ctrl: syscon@e00c0000 {
++				compatible = "microchip,lan966x-cpu-syscon", "syscon";
++				reg = <0x20c0000 0x350>;
++			};
++
++			switch_reset: reset-controller@e200400c {
++				compatible = "microchip,lan966x-switch-reset";
++				reg = <0x400c 0x4>;
++				reg-names = "gcb";
++				#reset-cells = <1>;
++				cpu-syscon = <&cpu_ctrl>;
++			};
++
++			flx4: flexcom@e0070000 {
++				compatible = "atmel,sama5d2-flexcom";
++				reg = <0x02070000 0x00000100>;
++				clocks = <&fabric_clk>;
++				#address-cells = <1>;
++				#size-cells = <1>;
++				ranges = <0x0 0x02070000 0x800>;
++
++				atmel,flexcom-mode = <ATMEL_FLEXCOM_MODE_TWI>;
++				status = "okay";
++
++				i2c_lan966x: i2c@600 {
++					compatible = "microchip,sam9x60-i2c";
++					reg = <0x600 0x200>;
++					interrupts = <52>;
++					#address-cells = <1>;
++					#size-cells = <0>;
++					clocks = <&nic_clk>;
++					pinctrl-0 = <&fc4_b_rx_pins>, <&fc4_b_tx_pins>;
++					pinctrl-names = "default";
++					i2c-analog-filter;
++					i2c-digital-filter;
++					i2c-digital-filter-width-ns = <35>;
++					i2c-sda-hold-time-ns = <1500>;
++					status = "okay";
++				};
++			};
++
++			sgpio0: gpio@61101036c {
++				#address-cells = <1>;
++				#size-cells = <0>;
++				compatible = "microchip,sparx5-sgpio";
++				status = "okay";
++				clocks = <&fabric_clk>;
++				pinctrl-0 = <&sgpio_a_pins>;
++				pinctrl-names = "default";
++				bus-frequency = <6000000>;
++				resets = <&switch_reset 0>;
++				reset-names = "switch";
++				reg = <0x00004190 0x00000118>;
++				microchip,sgpio-port-ranges = <0 3>, <8 11>;
++				sgpio_in0: gpio@0 {
++					compatible = "microchip,sparx5-sgpio-bank";
++					reg = <0>;
++					gpio-controller;
++					#gpio-cells = <3>;
++					ngpios = <64>;
++					interrupts = <18>;
++					interrupt-controller;
++					#interrupt-cells = <3>;
++				};
++				sgpio_out0: gpio@1 {
++					compatible = "microchip,sparx5-sgpio-bank";
++					reg = <1>;
++					gpio-controller;
++					#gpio-cells = <3>;
++					ngpios = <64>;
++				};
++			};
++
++			lan966x_gpio: pinctrl@e2004070 {
++				compatible = "microchip,lan966x-pinctrl";
++				reg = <0x00004064 0x000000b4>,
++				      <0x00010024 0x00000138>;
++				gpio-controller;
++				#gpio-cells = <2>;
++				gpio-ranges = <&lan966x_gpio 0 0 78>;
++				resets = <&switch_reset 0>;
++				reset-names = "switch";
++				status = "okay";
++
++				tod_pins: tod_pins {
++					pins = "GPIO_36";
++					function = "ptpsync_1";
++				};
++
++				sgpio_a_pins: sgpio-pins {
++					/* SCK, D0, D1, LD */
++					pins = "GPIO_32", "GPIO_33", "GPIO_34", "GPIO_35";
++					function = "sgpio_a";
++				};
++
++				fc4_b_rx_pins: fc4-b-rx-pins {
++					pins = "GPIO_57";
++					function = "fc4_b";
++				};
++
++				fc4_b_tx_pins: fc4-b-tx-pins {
++					pins = "GPIO_58";
++					function = "fc4_b";
++				};
++			};
++
++			i2c0_emux: i2c0-emux@0 {
++				compatible = "i2c-mux-gpio";
++				#address-cells = <1>;
++				#size-cells = <0>;
++				i2c-parent = <&i2c_lan966x>;
++				mux-gpios = <&sgpio_out0 11 0 GPIO_ACTIVE_HIGH>, // p11b0
++					    <&sgpio_out0 11 1 GPIO_ACTIVE_HIGH>; // p11b1
++				settle-time-us = <10000>; /* The signal needs to get stabilized */
++				i2c102: i2c_sfp1 {
++					reg = <1>;
++					#address-cells = <1>;
++					#size-cells = <0>;
++				};
++				i2c103: i2c_sfp2 {
++					reg = <2>;
++					#address-cells = <1>;
++					#size-cells = <0>;
++				};
++			};
++
++			sfp_eth2: sfp-eth2 {
++				compatible       = "sff,sfp";
++				i2c-bus          = <&i2c102>;
++				tx-disable-gpios = <&sgpio_out0 10 0 GPIO_ACTIVE_LOW>;
++				los-gpios        = <&sgpio_in0  2 0 GPIO_ACTIVE_HIGH>;
++				mod-def0-gpios   = <&sgpio_in0  2 1 GPIO_ACTIVE_LOW>;
++				tx-fault-gpios   = <&sgpio_in0  1 0 GPIO_ACTIVE_HIGH>;
++			};
++
++			sfp_eth3: sfp-eth3 {
++				compatible       = "sff,sfp";
++				i2c-bus          = <&i2c103>;
++				tx-disable-gpios = <&sgpio_out0 10 1 GPIO_ACTIVE_LOW>;
++				los-gpios        = <&sgpio_in0  3 0 GPIO_ACTIVE_HIGH>;
++				mod-def0-gpios   = <&sgpio_in0  3 1 GPIO_ACTIVE_LOW>;
++				tx-fault-gpios   = <&sgpio_in0  1 1 GPIO_ACTIVE_HIGH>;
++			};
++
++			serdes: serdes@e202c000 {
++				compatible = "microchip,lan966x-serdes";
++				reg = <0x0002c000 0x0000009c>,
++				      <0x00004010 0x00000004>;
++				#phy-cells = <2>;
++			};
++
++			lan966x_mdio1: mdio@413c {
++				#address-cells = <1>;
++				#size-cells = <0>;
++				compatible = "microchip,lan966x-miim";
++				reg = <0x0000413c 0x00000024>,
++				      <0x10020 0x4>;
++				status = "okay";
++
++				resets = <&switch_reset 0>;
++				reset-names = "switch";
++
++				lan966x_phy0: ethernet-lan966x_phy@0 {
++					reg = <1>;
++				};
++
++				lan966x_phy1: ethernet-lan966x_phy@1 {
++					reg = <2>;
++				};
++			};
++
++			lan966x_switch: switch@0 {
++				compatible = "microchip,lan966x-switch";
++				reg = <0x02000000 0x02000000>, /* BAR0: CSR */
++				      <0x00000000 0x01000000>; /* BAR1: CPU */
++				reg-names = "gcb", "cpu";
++				interrupts = <10 11 12 9>;
++				interrupt-names = "ptp-ext", "ptp", "xtr", "ana";
++
++				resets = <&switch_reset 0>;
++				reset-names = "switch";
++
++				pinctrl-0 = <&tod_pins>;
++				pinctrl-names = "default";
++
++				status = "okay";
++
++				ethernet-ports {
++					#address-cells = <1>;
++					#size-cells = <0>;
++
++					port0: port@0 {
++						status = "okay";
++						phy-handle = <&lan966x_phy0>;
++
++						reg = <0>;
++						phy-mode = "gmii";
++						phys = <&serdes 0 CU(0)>;
++
++						#address-cells = <1>;
++						#size-cells = <0>;
++
++						delay0 {
++							reg = <0>;
++							speed = <1000>;
++							rx_delay = <0x25000>;
++							tx_delay = <0x25000>;
++						};
++
++						delay1 {
++							reg = <0>;
++							speed = <100>;
++							rx_delay = <0x8f050>;
++							tx_delay = <0x8f050>;
++						};
++
++						delay2 {
++							reg = <0>;
++							speed = <10>;
++							rx_delay = <0x4b8000>;
++							tx_delay = <0x4b8000>;
++						};
++					};
++
++					port1: port@1 {
++						status = "okay";
++						phy-handle = <&lan966x_phy1>;
++
++						reg = <1>;
++						phy-mode = "gmii";
++						phys = <&serdes 1 CU(1)>;
++
++						#address-cells = <1>;
++						#size-cells = <0>;
++
++						delay0 {
++							reg = <0>;
++							speed = <1000>;
++							rx_delay = <0x25000>;
++							tx_delay = <0x25000>;
++						};
++
++						delay1 {
++							reg = <0>;
++							speed = <100>;
++							rx_delay = <0x8f050>;
++							tx_delay = <0x8f050>;
++						};
++
++						delay2 {
++							reg = <0>;
++							speed = <10>;
++							rx_delay = <0x4b8000>;
++							tx_delay = <0x4b8000>;
++						};
++					};
++
++					port2: port@2 {
++						status = "okay";
++
++						reg = <2>;
++						phy-mode = "sgmii";
++						phys = <&serdes 2 SERDES6G(0)>;
++						sfp = <&sfp_eth2>;
++						managed = "in-band-status";
++
++						#address-cells = <1>;
++						#size-cells = <0>;
++
++						delay0 {
++							reg = <0>;
++							speed = <1000>;
++							rx_delay = <0x25000>;
++							tx_delay = <0x25000>;
++						};
++
++						delay1 {
++							reg = <0>;
++							speed = <100>;
++							rx_delay = <0x8f050>;
++							tx_delay = <0x8f050>;
++						};
++
++						delay2 {
++							reg = <0>;
++							speed = <10>;
++							rx_delay = <0x4b8000>;
++							tx_delay = <0x4b8000>;
++						};
++					};
++
++					port3: port@3 {
++						status = "okay";
++
++						reg = <3>;
++						phy-mode = "sgmii";
++						phys = <&serdes 3 SERDES6G(1)>;
++						sfp = <&sfp_eth3>;
++						managed = "in-band-status";
++
++						#address-cells = <1>;
++						#size-cells = <0>;
++
++						delay0 {
++							reg = <0>;
++							speed = <1000>;
++							rx_delay = <0x25000>;
++							tx_delay = <0x25000>;
++						};
++
++						delay1 {
++							reg = <0>;
++							speed = <100>;
++							rx_delay = <0x8f050>;
++							tx_delay = <0x8f050>;
++						};
++
++						delay2 {
++							reg = <0>;
++							speed = <10>;
++							rx_delay = <0x4b8000>;
++							tx_delay = <0x4b8000>;
++						};
++					};
++				};
++			};
++		};
++	};
++};
++
++/* uart0 communicates with the BT module */
++&uart0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&uart0_ctsrts_gpio30 &uart0_gpio32>;
++	uart-has-rtscts;
++	status = "okay";
++
++	bluetooth {
++		compatible = "brcm,bcm43438-bt";
++		max-speed = <2000000>;
++		shutdown-gpios = <&expgpio 0 GPIO_ACTIVE_HIGH>;
++	};
++};
++
++/* uart1 is mapped to the pin header */
++&uart1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&uart1_gpio14>;
++	status = "okay";
++};
++
++&vchiq {
++	interrupts = <GIC_SPI 34 IRQ_TYPE_LEVEL_HIGH>;
++};
++
++&vc4 {
++	status = "okay";
++};
++
++&vec {
++	status = "disabled";
++};
+diff --git a/arch/arm/boot/dts/broadcom/bcm2711-rpi-cm4-lan966x.dts b/arch/arm/boot/dts/broadcom/bcm2711-rpi-cm4-lan966x.dts
+new file mode 100644
+index 000000000000..676e377a9fb0
+--- /dev/null
++++ b/arch/arm/boot/dts/broadcom/bcm2711-rpi-cm4-lan966x.dts
+@@ -0,0 +1,459 @@
++// SPDX-License-Identifier: GPL-2.0
++/dts-v1/;
++#include "bcm2711-rpi-cm4-pci.dtsi"
++
++#include <dt-bindings/phy/phy-lan966x-serdes.h>
++#include <dt-bindings/mfd/atmel-flexcom.h>
++#include <dt-bindings/clock/microchip,lan966x.h>
++
++/ {
++	aliases {
++		i2c102 = &i2c102;
++		i2c103 = &i2c103;
++	};
++};
++
++&emmc2 {
++	status = "okay";
++};
++
++&pcie0 {
++	pci@0,0 {
++		#address-cells = <3>;
++		#size-cells = <2>;
++		device_type = "pci";
++
++		reg = <0 0 0 0 0>;
++		ranges = <0x00000000 0x6 0x00000000  0x02000000 0x0 0xc0000000  0x0 0x40000000>;
++
++		lan966x: switch@0,0 {
++			compatible = "pci1055,9660";
++
++			reg = <0x0000 0 0 0 0>;
++			#address-cells = <1>;
++			#size-cells = <1>;
++
++			ranges = <0x00000000 0x0000000 0x6 0x00000000 0x40000000>;
++
++			#interrupt-cells = <1>;
++			interrupt-controller;
++			interrupt-parent = <&lan966x>;
++
++			leds {
++				compatible = "gpio-leds";
++				led@0 {
++					label = "s0:green";
++					gpios = <&sgpio_out0 2 0 GPIO_ACTIVE_LOW>;
++					default-state = "off";
++				};
++				led@1 {
++					label = "s0:red";
++					gpios = <&sgpio_out0 2 1 GPIO_ACTIVE_LOW>;
++					default-state = "off";
++				};
++				led@2 {
++					label = "s1:green";
++					gpios = <&sgpio_out0 3 0 GPIO_ACTIVE_LOW>;
++					default-state = "off";
++				};
++				led@3 {
++					label = "s1:red";
++					gpios = <&sgpio_out0 3 1 GPIO_ACTIVE_LOW>;
++					default-state = "off";
++				};
++				led@4 {
++					label = "cu0:green";
++					gpios = <&sgpio_out0 0 0 GPIO_ACTIVE_LOW>;
++					default-state = "off";
++					linux,default-trigger = "60000413c.mdio-mii:01:link";
++				};
++				led@5 {
++					label = "cu0:red";
++					gpios = <&sgpio_out0 0 1 GPIO_ACTIVE_LOW>;
++					default-state = "off";
++				};
++				led@6 {
++					label = "cu1:green";
++					gpios = <&sgpio_out0 1 0 GPIO_ACTIVE_LOW>;
++					default-state = "off";
++					linux,default-trigger = "60000413c.mdio-mii:02:link";
++				};
++				led@7 {
++					label = "cu1:red";
++					gpios = <&sgpio_out0 1 1 GPIO_ACTIVE_LOW>;
++					default-state = "off";
++				};
++			};
++
++			clocks {
++				cpu_clk: cpu_clk {
++					compatible = "fixed-clock";
++					#clock-cells = <0>;
++					clock-frequency = <600000000>;  // CPU clock = 600MHz
++				};
++
++				fabric_clk: fabric_clk {
++					compatible = "fixed-clock";
++					#clock-cells = <0>;
++					clock-frequency = <30000000>;  // Fabric clock = 30MHz
++				};
++
++				sys_clk: sys_clk {
++					compatible = "fixed-clock";
++					#clock-cells = <0>;
++					clock-frequency = <15625000>;  // System clock = 15.625MHz
++				};
++
++				nic_clk: nic_clk {
++					compatible = "fixed-clock";
++					#clock-cells = <0>;
++					clock-frequency = <200000000>;  // NIC clock = 200MHz
++				};
++			};
++
++			cpu_ctrl: syscon@e00c0000 {
++				compatible = "microchip,lan966x-cpu-syscon", "syscon";
++				reg = <0x20c0000 0x350>;
++			};
++
++			switch_reset: reset-controller@e200400c {
++				compatible = "microchip,lan966x-switch-reset";
++				reg = <0x400c 0x4>;
++				reg-names = "gcb";
++				#reset-cells = <1>;
++				cpu-syscon = <&cpu_ctrl>;
++			};
++
++			flx0: flexcom@e0070000 {
++				compatible = "atmel,sama5d2-flexcom";
++				reg = <0x02040000 0x00000100>;
++				clocks = <&fabric_clk>;
++				#address-cells = <1>;
++				#size-cells = <1>;
++				ranges = <0x0 0x02040000 0x800>;
++
++				atmel,flexcom-mode = <ATMEL_FLEXCOM_MODE_TWI>;
++				status = "okay";
++
++				i2c_lan966x: i2c@600 {
++					compatible = "microchip,sam9x60-i2c";
++					reg = <0x600 0x200>;
++					interrupts = <48>;
++					#address-cells = <1>;
++					#size-cells = <0>;
++					clocks = <&nic_clk>;
++					pinctrl-0 = <&fc0_a_rx_pins>, <&fc0_a_tx_pins>;
++					pinctrl-names = "default";
++					i2c-analog-filter;
++					i2c-digital-filter;
++					i2c-digital-filter-width-ns = <35>;
++					i2c-sda-hold-time-ns = <1500>;
++					status = "okay";
++				};
++			};
++
++			sgpio0: gpio@61101036c {
++				#address-cells = <1>;
++				#size-cells = <0>;
++				compatible = "microchip,sparx5-sgpio";
++				clocks = <&fabric_clk>;
++				pinctrl-0 = <&sgpio_a_pins>;
++				pinctrl-names = "default";
++				bus-frequency = <6000000>;
++				resets = <&switch_reset 0>;
++				reset-names = "switch";
++				reg = <0x00004190 0x00000118>;
++				microchip,sgpio-port-ranges = <0 3>, <8 11>;
++				sgpio_in0: gpio@0 {
++					compatible = "microchip,sparx5-sgpio-bank";
++					reg = <0>;
++					gpio-controller;
++					#gpio-cells = <3>;
++					ngpios = <64>;
++					interrupts = <GIC_SPI 18 IRQ_TYPE_LEVEL_HIGH>;
++					interrupt-controller;
++					#interrupt-cells = <3>;
++				};
++				sgpio_out0: gpio@1 {
++					compatible = "microchip,sparx5-sgpio-bank";
++					reg = <1>;
++					gpio-controller;
++					#gpio-cells = <3>;
++					ngpios = <64>;
++				};
++			};
++
++			lan966x_gpio: pinctrl@e2004070 {
++				compatible = "microchip,lan966x-pinctrl";
++				reg = <0x00004064 0x000000b4>,
++				      <0x00010024 0x00000138>;
++				gpio-controller;
++				#gpio-cells = <2>;
++				gpio-ranges = <&lan966x_gpio 0 0 78>;
++				status = "okay";
++
++				tod_pins: tod_pins {
++					pins = "GPIO_36";
++					function = "ptpsync_1";
++				};
++
++				fc0_a_rx_pins: fc0-a-rx-pins {
++					pins = "GPIO_9";
++					function = "fc0_a";
++				};
++
++				fc0_a_tx_pins: fc0-a-tx-pins {
++					pins = "GPIO_10";
++					function = "fc0_a";
++				};
++
++				i2cmux_pins: i2cmux-pins {
++					pins = "GPIO_76", "GPIO_77";
++					function = "twi_slc_gate";
++					output-low;
++				};
++
++				i2cmux_0: i2cmux-0 {
++					pins = "GPIO_76";
++					function = "twi_slc_gate";
++					output-high;
++				};
++
++				i2cmux_1: i2cmux-1 {
++					pins = "GPIO_77";
++					function = "twi_slc_gate";
++					output-high;
++				};
++
++				sgpio_a_pins: sgpio-pins {
++					pins = "GPIO_32", "GPIO_33";
++					function = "sgpio_a";
++				};
++			};
++
++			i2c0_emux: i2c0-emux@0 {
++				compatible = "i2c-mux-pinctrl";
++				#address-cells = <1>;
++				#size-cells = <0>;
++				i2c-parent = <&i2c_lan966x>;
++				pinctrl-names = "i2c102", "i2c103", "idle";
++				pinctrl-0 = <&i2cmux_0>;
++				pinctrl-1 = <&i2cmux_1>;
++				pinctrl-2 = <&i2cmux_pins>;
++
++				i2c102: i2c_sfp1 {
++					reg = <0>;
++					#address-cells = <1>;
++					#size-cells = <0>;
++				};
++
++				i2c103: i2c_sfp2 {
++					reg = <1>;
++					#address-cells = <1>;
++					#size-cells = <0>;
++				};
++			};
++
++			sfp_eth2: sfp-eth2 {
++				compatible       = "sff,sfp";
++				i2c-bus          = <&i2c102>;
++				tx-disable-gpios = <&lan966x_gpio  0 GPIO_ACTIVE_HIGH>;
++				los-gpios        = <&lan966x_gpio 25 GPIO_ACTIVE_HIGH>;
++				mod-def0-gpios   = <&lan966x_gpio 18 GPIO_ACTIVE_LOW>;
++				tx-fault-gpios   = <&lan966x_gpio  2 GPIO_ACTIVE_HIGH>;
++			};
++
++			sfp_eth3: sfp-eth3 {
++				compatible       = "sff,sfp";
++				i2c-bus          = <&i2c103>;
++				tx-disable-gpios = <&lan966x_gpio  1 GPIO_ACTIVE_HIGH>;
++				los-gpios        = <&lan966x_gpio 26 GPIO_ACTIVE_HIGH>;
++				mod-def0-gpios   = <&lan966x_gpio 19 GPIO_ACTIVE_LOW>;
++				tx-fault-gpios   = <&lan966x_gpio  3 GPIO_ACTIVE_HIGH>;
++			};
++
++			serdes: serdes@e202c000 {
++				compatible = "microchip,lan966x-serdes";
++				reg = <0x0002c000 0x0000009c>,
++				      <0x00004010 0x00000004>;
++				#phy-cells = <2>;
++			};
++
++			lan966x_mdio1: mdio@413c {
++				#address-cells = <1>;
++				#size-cells = <0>;
++				compatible = "microchip,lan966x-miim";
++				reg = <0x0000413c 0x00000024>,
++				      <0x10020 0x4>;
++				status = "okay";
++
++				resets = <&switch_reset 0>;
++				reset-names = "switch";
++
++				lan966x_phy0: ethernet-lan966x_phy@0 {
++					reg = <1>;
++				};
++
++				lan966x_phy1: ethernet-lan966x_phy@1 {
++					reg = <2>;
++				};
++			};
++
++			lan966x_switch: switch@0 {
++				compatible = "microchip,lan966x-switch";
++				reg = <0x02000000 0x02000000>, /* BAR0: CSR */
++				      <0x00000000 0x01000000>; /* BAR1: CPU */
++				reg-names = "gcb", "cpu";
++				interrupts = <10 11 12 9>;
++				interrupt-names = "ptp-ext", "ptp", "xtr", "ana";
++
++				resets = <&switch_reset 0>;
++				reset-names = "switch";
++
++				pinctrl-0 = <&tod_pins>;
++				pinctrl-names = "default";
++
++				status = "okay";
++
++				ethernet-ports {
++					#address-cells = <1>;
++					#size-cells = <0>;
++
++					port0: port@0 {
++						status = "okay";
++						phy-handle = <&lan966x_phy0>;
++
++						reg = <0>;
++						phy-mode = "gmii";
++						phys = <&serdes 0 CU(0)>;
++
++						#address-cells = <1>;
++						#size-cells = <0>;
++
++						delay0 {
++							reg = <0>;
++							speed = <1000>;
++							rx_delay = <0x25000>;
++							tx_delay = <0x25000>;
++						};
++
++						delay1 {
++							reg = <0>;
++							speed = <100>;
++							rx_delay = <0x8f050>;
++							tx_delay = <0x8f050>;
++						};
++
++						delay2 {
++							reg = <0>;
++							speed = <10>;
++							rx_delay = <0x4b8000>;
++							tx_delay = <0x4b8000>;
++						};
++					};
++
++					port1: port@1 {
++						status = "okay";
++						phy-handle = <&lan966x_phy1>;
++
++						reg = <1>;
++						phy-mode = "gmii";
++						phys = <&serdes 1 CU(1)>;
++
++						#address-cells = <1>;
++						#size-cells = <0>;
++
++						delay0 {
++							reg = <0>;
++							speed = <1000>;
++							rx_delay = <0x25000>;
++							tx_delay = <0x25000>;
++						};
++
++						delay1 {
++							reg = <0>;
++							speed = <100>;
++							rx_delay = <0x8f050>;
++							tx_delay = <0x8f050>;
++						};
++
++						delay2 {
++							reg = <0>;
++							speed = <10>;
++							rx_delay = <0x4b8000>;
++							tx_delay = <0x4b8000>;
++						};
++					};
++
++					port2: port@2 {
++						status = "okay";
++
++						reg = <2>;
++						phy-mode = "sgmii";
++						phys = <&serdes 2 SERDES6G(0)>;
++						sfp = <&sfp_eth2>;
++						managed = "in-band-status";
++
++						#address-cells = <1>;
++						#size-cells = <0>;
++
++						delay0 {
++							reg = <0>;
++							speed = <1000>;
++							rx_delay = <0x25000>;
++							tx_delay = <0x25000>;
++						};
++
++						delay1 {
++							reg = <0>;
++							speed = <100>;
++							rx_delay = <0x8f050>;
++							tx_delay = <0x8f050>;
++						};
++
++						delay2 {
++							reg = <0>;
++							speed = <10>;
++							rx_delay = <0x4b8000>;
++							tx_delay = <0x4b8000>;
++						};
++					};
++
++					port3: port@3 {
++						status = "okay";
++
++						reg = <3>;
++						phy-mode = "sgmii";
++						phys = <&serdes 3 SERDES6G(1)>;
++						sfp = <&sfp_eth3>;
++						managed = "in-band-status";
++
++						#address-cells = <1>;
++						#size-cells = <0>;
++
++						delay0 {
++							reg = <0>;
++							speed = <1000>;
++							rx_delay = <0x25000>;
++							tx_delay = <0x25000>;
++						};
++
++						delay1 {
++							reg = <0>;
++							speed = <100>;
++							rx_delay = <0x8f050>;
++							tx_delay = <0x8f050>;
++						};
++
++						delay2 {
++							reg = <0>;
++							speed = <10>;
++							rx_delay = <0x4b8000>;
++							tx_delay = <0x4b8000>;
++						};
++					};
++				};
++			};
++		};
++	};
++};
+diff --git a/arch/arm/boot/dts/broadcom/bcm2711-rpi-cm4-pci.dtsi b/arch/arm/boot/dts/broadcom/bcm2711-rpi-cm4-pci.dtsi
+new file mode 100644
+index 000000000000..459b8063412f
+--- /dev/null
++++ b/arch/arm/boot/dts/broadcom/bcm2711-rpi-cm4-pci.dtsi
+@@ -0,0 +1,317 @@
++// SPDX-License-Identifier: GPL-2.0
++/dts-v1/;
++#include "bcm2711.dtsi"
++#include "bcm2835-rpi.dtsi"
++
++#include <dt-bindings/reset/raspberrypi,firmware-reset.h>
++
++/ {
++	compatible = "raspberrypi,4-compute-module", "brcm,bcm2711";
++	model = "Raspberry Pi Compute Module 4";
++
++	chosen {
++		/* 8250 auxiliary UART instead of pl011 */
++		stdout-path = "serial1:115200n8";
++	};
++
++	/* Will be filled by the bootloader */
++	memory@0 {
++		device_type = "memory";
++		reg = <0 0 0>;
++	};
++
++	aliases {
++		emmc2bus = &emmc2bus;
++		ethernet0 = &genet;
++		pcie0 = &pcie0;
++		blconfig = &blconfig;
++	};
++
++	leds {
++		led-act {
++			gpios = <&gpio 42 GPIO_ACTIVE_HIGH>;
++		};
++
++		led-pwr {
++			label = "PWR";
++			gpios = <&expgpio 2 GPIO_ACTIVE_LOW>;
++			default-state = "keep";
++			linux,default-trigger = "default-on";
++		};
++	};
++
++	wifi_pwrseq: wifi-pwrseq {
++		compatible = "mmc-pwrseq-simple";
++		reset-gpios = <&expgpio 1 GPIO_ACTIVE_LOW>;
++	};
++
++	sd_io_1v8_reg: sd_io_1v8_reg {
++		compatible = "regulator-gpio";
++		regulator-name = "vdd-sd-io";
++		regulator-min-microvolt = <1800000>;
++		regulator-max-microvolt = <3300000>;
++		regulator-boot-on;
++		regulator-always-on;
++		regulator-settling-time-us = <5000>;
++		gpios = <&expgpio 4 GPIO_ACTIVE_HIGH>;
++		states = <1800000 0x1
++			  3300000 0x0>;
++		status = "okay";
++	};
++
++	sd_vcc_reg: sd_vcc_reg {
++		compatible = "regulator-fixed";
++		regulator-name = "vcc-sd";
++		regulator-min-microvolt = <3300000>;
++		regulator-max-microvolt = <3300000>;
++		regulator-boot-on;
++		enable-active-high;
++		gpio = <&expgpio 6 GPIO_ACTIVE_HIGH>;
++	};
++};
++
++&ddc0 {
++	status = "okay";
++};
++
++&ddc1 {
++	status = "okay";
++};
++
++&firmware {
++	firmware_clocks: clocks {
++		compatible = "raspberrypi,firmware-clocks";
++		#clock-cells = <1>;
++	};
++
++	expgpio: gpio {
++		compatible = "raspberrypi,firmware-gpio";
++		gpio-controller;
++		#gpio-cells = <2>;
++		gpio-line-names = "BT_ON",
++				  "WL_ON",
++				  "PWR_LED_OFF",
++				  "ANT1",
++				  "VDD_SD_IO_SEL",
++				  "CAM_GPIO",
++				  "SD_PWR_ON",
++				  "ANT2";
++		status = "okay";
++
++		ant1: ant1 {
++			gpio-hog;
++			gpios = <3 GPIO_ACTIVE_HIGH>;
++			output-high;
++		};
++
++		ant2: ant2 {
++			gpio-hog;
++			gpios = <7 GPIO_ACTIVE_HIGH>;
++			output-low;
++		};
++	};
++
++	reset: reset {
++		compatible = "raspberrypi,firmware-reset";
++		#reset-cells = <1>;
++	};
++};
++
++&gpio {
++	/*
++	 * Parts taken from rpi_SCH_4b_4p0_reduced.pdf and
++	 * the official GPU firmware DT blob.
++	 *
++	 * Legend:
++	 * "FOO" = GPIO line named "FOO" on the schematic
++	 * "FOO_N" = GPIO line named "FOO" on schematic, active low
++	 */
++	gpio-line-names = "ID_SDA",
++			  "ID_SCL",
++			  "SDA1",
++			  "SCL1",
++			  "GPIO_GCLK",
++			  "GPIO5",
++			  "GPIO6",
++			  "SPI_CE1_N",
++			  "SPI_CE0_N",
++			  "SPI_MISO",
++			  "SPI_MOSI",
++			  "SPI_SCLK",
++			  "GPIO12",
++			  "GPIO13",
++			  /* Serial port */
++			  "TXD1",
++			  "RXD1",
++			  "GPIO16",
++			  "GPIO17",
++			  "GPIO18",
++			  "GPIO19",
++			  "GPIO20",
++			  "GPIO21",
++			  "GPIO22",
++			  "GPIO23",
++			  "GPIO24",
++			  "GPIO25",
++			  "GPIO26",
++			  "GPIO27",
++			  "RGMII_MDIO",
++			  "RGMIO_MDC",
++			  /* Used by BT module */
++			  "CTS0",
++			  "RTS0",
++			  "TXD0",
++			  "RXD0",
++			  /* Used by Wifi */
++			  "SD1_CLK",
++			  "SD1_CMD",
++			  "SD1_DATA0",
++			  "SD1_DATA1",
++			  "SD1_DATA2",
++			  "SD1_DATA3",
++			  /* Shared with SPI flash */
++			  "PWM0_MISO",
++			  "PWM1_MOSI",
++			  "STATUS_LED_G_CLK",
++			  "SPIFLASH_CE_N",
++			  "SDA0",
++			  "SCL0",
++			  "RGMII_RXCLK",
++			  "RGMII_RXCTL",
++			  "RGMII_RXD0",
++			  "RGMII_RXD1",
++			  "RGMII_RXD2",
++			  "RGMII_RXD3",
++			  "RGMII_TXCLK",
++			  "RGMII_TXCTL",
++			  "RGMII_TXD0",
++			  "RGMII_TXD1",
++			  "RGMII_TXD2",
++			  "RGMII_TXD3";
++};
++
++&hdmi0 {
++	clocks = <&firmware_clocks 13>, <&firmware_clocks 14>, <&dvp 0>, <&clk_27MHz>;
++	clock-names = "hdmi", "bvb", "audio", "cec";
++	status = "okay";
++};
++
++&hdmi1 {
++	clocks = <&firmware_clocks 13>, <&firmware_clocks 14>, <&dvp 1>, <&clk_27MHz>;
++	clock-names = "hdmi", "bvb", "audio", "cec";
++	status = "okay";
++};
++
++&hvs {
++	clocks = <&firmware_clocks 4>;
++};
++
++&pixelvalve0 {
++	status = "okay";
++};
++
++&pixelvalve1 {
++	status = "okay";
++};
++
++&pixelvalve2 {
++	status = "okay";
++};
++
++&pixelvalve4 {
++	status = "okay";
++};
++
++&pwm1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&pwm1_0_gpio40 &pwm1_1_gpio41>;
++	status = "okay";
++};
++
++&rmem {
++	/*
++	 * RPi4's co-processor will copy the board's bootloader configuration
++	 * into memory for the OS to consume. It'll also update this node with
++	 * its placement information.
++	 */
++	blconfig: nvram@0 {
++		compatible = "raspberrypi,bootloader-config", "nvmem-rmem";
++		#address-cells = <1>;
++		#size-cells = <1>;
++		reg = <0x0 0x0 0x0>;
++		no-map;
++		status = "disabled";
++	};
++};
++
++/* SDHCI is used to control the SDIO for wireless */
++&sdhci {
++	#address-cells = <1>;
++	#size-cells = <0>;
++	pinctrl-names = "default";
++	pinctrl-0 = <&emmc_gpio34>;
++	bus-width = <4>;
++	non-removable;
++	mmc-pwrseq = <&wifi_pwrseq>;
++	status = "okay";
++
++	brcmf: wifi@1 {
++		reg = <1>;
++		compatible = "brcm,bcm4329-fmac";
++	};
++};
++
++/* EMMC2 is used to drive the EMMC card */
++&emmc2 {
++	bus-width = <8>;
++	vqmmc-supply = <&sd_io_1v8_reg>;
++	vmmc-supply = <&sd_vcc_reg>;
++	broken-cd;
++	status = "disable";
++};
++
++&genet {
++	phy-handle = <&phy0>;
++	phy-mode = "rgmii-rxid";
++	status = "okay";
++};
++
++&genet_mdio {
++	phy0: ethernet-phy@0 {
++		/* No PHY interrupt */
++		reg = <0x0>;
++	};
++};
++
++/* uart0 communicates with the BT module */
++&uart0 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&uart0_ctsrts_gpio30 &uart0_gpio32>;
++	uart-has-rtscts;
++	status = "okay";
++
++	bluetooth {
++		compatible = "brcm,bcm43438-bt";
++		max-speed = <2000000>;
++		shutdown-gpios = <&expgpio 0 GPIO_ACTIVE_HIGH>;
++	};
++};
++
++/* uart1 is mapped to the pin header */
++&uart1 {
++	pinctrl-names = "default";
++	pinctrl-0 = <&uart1_gpio14>;
++	status = "okay";
++};
++
++&vchiq {
++	interrupts = <GIC_SPI 34 IRQ_TYPE_LEVEL_HIGH>;
++};
++
++&vc4 {
++	status = "okay";
++};
++
++&vec {
++	status = "disabled";
++};
+diff --git a/arch/arm/boot/dts/broadcom/bcm2711.dtsi b/arch/arm/boot/dts/broadcom/bcm2711.dtsi
+index e4e42af21ef3..6f393c7604a7 100644
+--- a/arch/arm/boot/dts/broadcom/bcm2711.dtsi
++++ b/arch/arm/boot/dts/broadcom/bcm2711.dtsi
+@@ -421,7 +421,7 @@ emmc2bus: emmc2bus {
+ 		#size-cells = <1>;
+ 
+ 		ranges = <0x0 0x7e000000  0x0 0xfe000000  0x01800000>;
+-		dma-ranges = <0x0 0xc0000000  0x0 0x00000000  0x40000000>;
++		dma-ranges = <0x0 0x00000000  0x0 0x00000000  0xfc000000>;
+ 
+ 		emmc2: mmc@7e340000 {
+ 			compatible = "brcm,bcm2711-emmc2";
+@@ -574,8 +574,8 @@ IRQ_TYPE_LEVEL_HIGH>,
+ 			msi-controller;
+ 			msi-parent = <&pcie0>;
+ 
+-			ranges = <0x02000000 0x0 0xf8000000 0x6 0x00000000
+-				  0x0 0x04000000>;
++			ranges = <0x02000000 0x0 0xc0000000 0x6 0x00000000
++				  0x0 0x40000000>;
+ 			/*
+ 			 * The wrapper around the PCIe block has a bug
+ 			 * preventing it from accessing beyond the first 3GB of
+diff --git a/arch/arm64/boot/dts/broadcom/Makefile b/arch/arm64/boot/dts/broadcom/Makefile
+index 92565e9781ad..5c63cd113e90 100644
+--- a/arch/arm64/boot/dts/broadcom/Makefile
++++ b/arch/arm64/boot/dts/broadcom/Makefile
+@@ -6,6 +6,8 @@ DTC_FLAGS := -@
+ dtb-$(CONFIG_ARCH_BCM2835) += bcm2711-rpi-400.dtb \
+ 			      bcm2711-rpi-4-b.dtb \
+ 			      bcm2711-rpi-cm4-io.dtb \
++			      bcm2711-rpi-cm4-lan966x.dtb \
++			      bcm2711-rpi-cm4-lan969x.dtb \
+ 			      bcm2712-rpi-5-b.dtb \
+ 			      bcm2837-rpi-3-a-plus.dtb \
+ 			      bcm2837-rpi-3-b.dtb \
+@@ -16,3 +18,4 @@ dtb-$(CONFIG_ARCH_BCM2835) += bcm2711-rpi-400.dtb \
+ subdir-y	+= bcmbca
+ subdir-y	+= northstar2
+ subdir-y	+= stingray
++subdir-y	+= microchip
+diff --git a/arch/arm64/boot/dts/broadcom/bcm2711-rpi-cm4-lan966x.dts b/arch/arm64/boot/dts/broadcom/bcm2711-rpi-cm4-lan966x.dts
+new file mode 100644
+index 000000000000..f851435bb258
+--- /dev/null
++++ b/arch/arm64/boot/dts/broadcom/bcm2711-rpi-cm4-lan966x.dts
+@@ -0,0 +1 @@
++#include "../../../../arm/boot/dts/broadcom/bcm2711-rpi-cm4-lan966x.dts"
+diff --git a/arch/arm64/boot/dts/broadcom/bcm2711-rpi-cm4-lan969x.dts b/arch/arm64/boot/dts/broadcom/bcm2711-rpi-cm4-lan969x.dts
+new file mode 100644
+index 000000000000..29f970b44d5c
+--- /dev/null
++++ b/arch/arm64/boot/dts/broadcom/bcm2711-rpi-cm4-lan969x.dts
+@@ -0,0 +1,779 @@
++// SPDX-License-Identifier: GPL-2.0
++/dts-v1/;
++#include "../../../../arm/boot/dts/broadcom/bcm2711-rpi-cm4-pci.dtsi"
++
++#include <dt-bindings/mfd/atmel-flexcom.h>
++#include <dt-bindings/clock/microchip,lan966x.h>
++
++/ {
++	aliases {
++	};
++};
++
++&emmc2 {
++	status = "okay";
++};
++
++&pcie0 {
++	/* root bus resource [mem 0x600000000-0x63fffffff] (bus address [0xc0000000-0xffffffff])
++	 * CSR:  BAR 0: [0x600000000-0x601ffffff]: 32MB => [0xc0000000-0xc01ffffff] => 0xe2000000
++	 * CPU:  BAR 1: [0x602000000-0x602ffffff]: 16MB => [0xc0200000-0xc02ffffff] => 0xe0000000
++	 * SRAM: BAR 4: [0x603000000-0x60301ffff]: 128KB
++	 * ATU:  BAR 5: [0x603020000-0x603021fff]: 8KB
++	 * sbc does the last mapping:
++	 *   ranges = <0x02000000 0x0 0xc0000000 0x6 0x00000000 0x0 0x40000000>;
++	 */
++
++	pci@0,0 {
++		#address-cells = <3>;
++		#size-cells = <2>;
++		device_type = "pci";
++
++		reg = <0 0 0 0 0>;
++		ranges = <0x02000000 0x0 0xc0000000 0x02000000 0x0 0xc0000000 0x0 0x40000000>;
++
++		lan969x: ep_lan969x@0,0 {
++			compatible = "pci1055,9690";
++
++			reg = <0 0 0 0 0>;
++			#address-cells = <1>;
++			#size-cells = <1>;
++
++			ranges = <0xe2000000 0x02000000 0x0 0xc0000000 0x02000000>,
++			         <0xe0000000 0x02000000 0x0 0xc2000000 0x01000000>;
++
++			#interrupt-cells = <2>;
++			interrupt-controller;
++			interrupt-parent = <&lan969x>;
++
++			clocks {
++				fx100_clk: fx100-clk {
++					compatible = "fixed-clock";
++					#clock-cells = <0>;
++					clock-frequency = <320000000>;
++				};
++
++				fabric_clk: fabric-clk {
++					compatible = "fixed-clock";
++					#clock-cells = <0>;
++					clock-frequency = <250000000>;
++				};
++			};
++
++			cpu_ctrl: syscon@e00c0000 {
++				compatible = "microchip,lan966x-cpu-syscon", "syscon";
++				reg = <0xe00c0000 0x350>;
++			};
++
++			lan969x_gpio: pinctrl@e20100d4 {
++				compatible = "microchip,lan969x-pinctrl";
++				reg = <0xe20100d4 0xd4>,
++				      <0xe2010370 0xa8>;
++				gpio-controller;
++				#gpio-cells = <2>;
++				gpio-ranges = <&lan969x_gpio 0 0 66>;
++				interrupt-controller;
++				interrupts = <15 IRQ_TYPE_LEVEL_HIGH>;
++				#interrupt-cells = <2>;
++				#address-cells = <1>;
++			};
++
++			mdio0: mdio@e20101a8 {
++				compatible = "mscc,ocelot-miim";
++				#address-cells = <1>;
++				#size-cells = <0>;
++				reg = <0xe20101a8 0x24>;
++				clocks = <&fx100_clk>;
++				status = "disabled";
++			};
++
++			sgpio: gpio@e2010230 {
++				compatible = "microchip,sparx5-sgpio";
++				reg = <0xe2010230 0x118>;
++				clocks = <&fx100_clk>;
++				#address-cells = <1>;
++				#size-cells = <0>;
++				status = "disabled";
++
++				sgpio_in: gpio@0 {
++					compatible = "microchip,sparx5-sgpio-bank";
++					reg = <0>;
++					gpio-controller;
++					#gpio-cells = <3>;
++					interrupts = <16 IRQ_TYPE_LEVEL_HIGH>;
++					interrupt-controller;
++					#interrupt-cells = <3>;
++					#adress-cells = <0>;
++				};
++
++				sgpio_out: gpio@1 {
++					compatible = "microchip,sparx5-sgpio-bank";
++					reg = <1>;
++					gpio-controller;
++					#gpio-cells = <3>;
++				};
++			};
++
++			lan969x_flx3: flexcom@e0064000 {
++				compatible = "atmel,sama5d2-flexcom";
++				reg = <0xe0064000 0x100>;
++				clocks = <&fabric_clk>;
++				#address-cells = <1>;
++				#size-cells = <1>;
++				ranges = <0x0 0xe0064000 0x800>;
++
++				atmel,flexcom-mode = <ATMEL_FLEXCOM_MODE_TWI>;
++				status = "okay";
++
++				lan969x_i2c3: i2c@600 {
++					compatible = "microchip,sam9x60-i2c";
++					reg = <0x600 0x200>;
++					interrupts = <49 IRQ_TYPE_LEVEL_HIGH>;
++					clocks = <&fabric_clk>;
++					#address-cells = <1>;
++					#size-cells = <0>;
++					pinctrl-0 = <&fc3_pins>;
++					pinctrl-names = "default";
++					i2c-analog-filter;
++					i2c-digital-filter;
++					i2c-digital-filter-width-ns = <35>;
++					i2c-sda-hold-time-ns = <1500>;
++					status = "okay";
++				};
++			};
++
++			i2c-mux {
++				compatible = "i2c-mux-gpio";
++				#address-cells = <1>;
++				#size-cells = <0>;
++				i2c-parent = <&lan969x_i2c3>;
++
++				mux-gpios = <&sgpio_out 0 1 GPIO_ACTIVE_HIGH
++					     &sgpio_out 0 2 GPIO_ACTIVE_HIGH
++					     &sgpio_out 0 3 GPIO_ACTIVE_HIGH>;
++				idle-state = <0x8>;
++
++				i2c_sfp0: i2c-sfp0 {
++					reg = <0x0>;
++				};
++
++				i2c_sfp1: i2c-sfp1 {
++					reg = <0x1>;
++				};
++
++				i2c_sfp2: i2c-sfp2 {
++					reg = <0x2>;
++				};
++
++				i2c_sfp3: i2c-sfp3 {
++					reg = <0x3>;
++				};
++			};
++
++			sfp0: sfp0 {
++				compatible = "sff,sfp";
++				i2c-bus = <&i2c_sfp0>;
++				tx-disable-gpios = <&sgpio_out 6 2 GPIO_ACTIVE_HIGH>;
++				los-gpios = <&sgpio_in 6 0 GPIO_ACTIVE_HIGH>;
++				mod-def0-gpios = <&sgpio_in 6 1 GPIO_ACTIVE_LOW>;
++				tx-fault-gpios = <&sgpio_in 6 2 GPIO_ACTIVE_HIGH>;
++			};
++
++			sfp1: sfp1 {
++				compatible = "sff,sfp";
++				i2c-bus = <&i2c_sfp1>;
++				tx-disable-gpios = <&sgpio_out 7 2 GPIO_ACTIVE_HIGH>;
++				los-gpios = <&sgpio_in 7 0 GPIO_ACTIVE_HIGH>;
++				mod-def0-gpios = <&sgpio_in 7 1 GPIO_ACTIVE_LOW>;
++				tx-fault-gpios = <&sgpio_in 7 2 GPIO_ACTIVE_HIGH>;
++			};
++
++			sfp2: sfp2 {
++				compatible = "sff,sfp";
++				i2c-bus = <&i2c_sfp2>;
++				tx-disable-gpios = <&sgpio_out 8 2 GPIO_ACTIVE_HIGH>;
++				los-gpios = <&sgpio_in 8 0 GPIO_ACTIVE_HIGH>;
++				mod-def0-gpios = <&sgpio_in 8 1 GPIO_ACTIVE_LOW>;
++				tx-fault-gpios = <&sgpio_in 8 2 GPIO_ACTIVE_HIGH>;
++			};
++
++			sfp3: sfp3 {
++				compatible = "sff,sfp";
++				i2c-bus = <&i2c_sfp3>;
++				tx-disable-gpios = <&sgpio_out 9 2 GPIO_ACTIVE_HIGH>;
++				los-gpios = <&sgpio_in 9 0 GPIO_ACTIVE_HIGH>;
++				mod-def0-gpios = <&sgpio_in 9 1 GPIO_ACTIVE_LOW>;
++				tx-fault-gpios = <&sgpio_in 9 2 GPIO_ACTIVE_HIGH>;
++			};
++
++			lan969x_switch: switch@e0000000 {
++				compatible = "microchip,lan969x-switch";
++				reg = <0xe00c0000 0x0010000>,
++				      <0xe2010000 0x1410000>;
++				reg-names = "cpu", "dev";
++				interrupt-names = "xtr", "ptp", "ptp-ext";
++				interrupts = <10 IRQ_TYPE_LEVEL_HIGH>,
++					     <9 IRQ_TYPE_LEVEL_HIGH>,
++					     <8 IRQ_TYPE_LEVEL_HIGH>;
++			};
++
++			serdes: serdes@e3410000 {
++				compatible = "microchip,lan969x-serdes";
++				#phy-cells = <1>;
++				clocks = <&fabric_clk>;
++				reg = <0xe3410000 0x150000>;
++			};
++
++			leds {
++				compatible = "gpio-leds";
++
++				led-s6-green {
++					label = "s6:green";
++					gpios = <&sgpio_out 6 0 GPIO_ACTIVE_LOW>;
++					default-state = "off";
++				};
++
++				led-s6-yellow {
++					label = "s6:yellow";
++					gpios = <&sgpio_out 6 1 GPIO_ACTIVE_LOW>;
++					default-state = "off";
++				};
++
++				led-s7-green {
++					label = "s7:green";
++					gpios = <&sgpio_out 7 0 GPIO_ACTIVE_LOW>;
++					default-state = "off";
++				};
++
++				led-s7-yellow {
++					label = "s7:yellow";
++					gpios = <&sgpio_out 7 1 GPIO_ACTIVE_LOW>;
++					default-state = "off";
++				};
++
++				led-s8-green {
++					label = "s8:green";
++					gpios = <&sgpio_out 8 0 GPIO_ACTIVE_LOW>;
++					default-state = "off";
++				};
++
++				led-s8-yellow {
++					label = "s8:yellow";
++					gpios = <&sgpio_out 8 1 GPIO_ACTIVE_LOW>;
++					default-state = "off";
++				};
++
++				led-s9-green {
++					label = "s9:green";
++					gpios = <&sgpio_out 9 0 GPIO_ACTIVE_LOW>;
++					default-state = "off";
++				};
++
++				led-s9-yellow {
++					label = "s9:yellow";
++					gpios = <&sgpio_out 9 1 GPIO_ACTIVE_LOW>;
++					default-state = "off";
++				};
++			};
++		};
++	};
++};
++
++&lan969x_gpio {
++	emmc_sd_pins: emmc-sd-pins {
++		/* eMMC_SD - CMD, CLK, D0, D1, D2, D3, D4, D5, D6, D7, RSTN */
++		pins = "GPIO_14", "GPIO_15", "GPIO_16", "GPIO_17",
++		       "GPIO_18", "GPIO_19", "GPIO_20", "GPIO_21",
++		       "GPIO_22", "GPIO_23", "GPIO_24";
++		function = "emmc_sd";
++	};
++
++	fc0_pins: fc0-pins {
++		pins = "GPIO_3", "GPIO_4";
++		function = "fc";
++	};
++
++	fc2_pins: fc2-pins {
++		pins = "GPIO_64", "GPIO_65", "GPIO_66";
++		function = "fc";
++	};
++
++	fc3_pins: fc3-pins {
++		pins = "GPIO_55", "GPIO_56";
++		function = "fc";
++	};
++
++	mdio_pins: mdio-pins {
++		pins = "GPIO_9", "GPIO_10";
++		function = "miim";
++	};
++
++	mdio_irq_pins: mdio-irq-pins {
++		pins = "GPIO_11";
++		function = "miim_irq";
++	};
++
++	sgpio_pins: sgpio-pins {
++		/* SCK, D0, D1, LD */
++		pins = "GPIO_5", "GPIO_6", "GPIO_7", "GPIO_8";
++		function = "sgpio_a";
++	};
++
++	usb_ulpi_pins: usb-ulpi-pins {
++		pins = "GPIO_30", "GPIO_31", "GPIO_32", "GPIO_33",
++		"GPIO_34", "GPIO_35", "GPIO_36", "GPIO_37",
++		"GPIO_38", "GPIO_39", "GPIO_40", "GPIO_41";
++		function = "usb_ulpi";
++	};
++
++	usb_rst_pins: usb-rst-pins {
++		pins = "GPIO_12";
++		function = "usb2phy_rst";
++	};
++
++	usb_over_pins: usb-over-pins {
++		pins = "GPIO_13";
++		function = "usb_over_detect";
++	};
++
++	usb_power_pins: usb-power-pins {
++		pins = "GPIO_1";
++		function = "usb_power";
++	};
++
++	ptp_out_pins: ptp-out-pins {
++		pins = "GPIO_58";
++		function = "ptpsync_4";
++	};
++
++	ptp_ext_pins: ptp-ext-pins {
++		pins = "GPIO_59";
++		function = "ptpsync_5";
++	};
++};
++
++&mdio0 {
++	pinctrl-0 = <&mdio_pins>, <&mdio_irq_pins>;
++	pinctrl-names = "default";
++	reset-gpios = <&lan969x_gpio 62 GPIO_ACTIVE_LOW>;
++	status = "okay";
++
++	phy3: phy@3 {
++		reg = <3>;
++		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
++		interrupt-parent = <&lan969x_gpio>;
++	};
++
++	phy4: phy@4 {
++		reg = <4>;
++		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
++		interrupt-parent = <&lan969x_gpio>;
++	};
++
++	phy5: phy@5 {
++		reg = <5>;
++		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
++		interrupt-parent = <&lan969x_gpio>;
++	};
++
++	phy6: phy@6 {
++		reg = <6>;
++		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
++		interrupt-parent = <&lan969x_gpio>;
++	};
++
++	phy7: phy@7 {
++		reg = <7>;
++		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
++		interrupt-parent = <&lan969x_gpio>;
++	};
++
++	phy8: phy@8 {
++		reg = <8>;
++		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
++		interrupt-parent = <&lan969x_gpio>;
++	};
++
++	phy9: phy@9 {
++		reg = <9>;
++		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
++		interrupt-parent = <&lan969x_gpio>;
++	};
++
++	phy10: phy@10 {
++		reg = <10>;
++		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
++		interrupt-parent = <&lan969x_gpio>;
++	};
++
++	phy11: phy@11 {
++		reg = <11>;
++		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
++		interrupt-parent = <&lan969x_gpio>;
++	};
++
++	phy12: phy@12 {
++		reg = <12>;
++		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
++		interrupt-parent = <&lan969x_gpio>;
++	};
++
++	phy13: phy@13 {
++		reg = <13>;
++		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
++		interrupt-parent = <&lan969x_gpio>;
++	};
++
++	phy14: phy@14 {
++		reg = <14>;
++		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
++		interrupt-parent = <&lan969x_gpio>;
++	};
++
++	phy15: phy@15 {
++		reg = <15>;
++		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
++		interrupt-parent = <&lan969x_gpio>;
++	};
++
++	phy16: phy@16 {
++		reg = <16>;
++		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
++		interrupt-parent = <&lan969x_gpio>;
++	};
++
++	phy17: phy@17 {
++		reg = <17>;
++		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
++		interrupt-parent = <&lan969x_gpio>;
++	};
++
++	phy18: phy@18 {
++		reg = <18>;
++		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
++		interrupt-parent = <&lan969x_gpio>;
++	};
++
++	phy19: phy@19 {
++		reg = <19>;
++		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
++		interrupt-parent = <&lan969x_gpio>;
++	};
++
++	phy20: phy@20 {
++		reg = <20>;
++		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
++		interrupt-parent = <&lan969x_gpio>;
++	};
++
++	phy21: phy@21 {
++		reg = <21>;
++		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
++		interrupt-parent = <&lan969x_gpio>;
++	};
++
++	phy22: phy@22 {
++		reg = <22>;
++		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
++		interrupt-parent = <&lan969x_gpio>;
++	};
++
++	phy23: phy@23 {
++		reg = <23>;
++		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
++		interrupt-parent = <&lan969x_gpio>;
++	};
++
++	phy24: phy@24 {
++		reg = <24>;
++		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
++		interrupt-parent = <&lan969x_gpio>;
++	};
++
++	phy25: phy@25 {
++		reg = <25>;
++		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
++		interrupt-parent = <&lan969x_gpio>;
++	};
++
++	phy26: phy@26 {
++		reg = <26>;
++		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
++		interrupt-parent = <&lan969x_gpio>;
++	};
++
++	phy27: phy@27 {
++		reg = <27>;
++		interrupts = <11 IRQ_TYPE_LEVEL_LOW>;
++		interrupt-parent = <&lan969x_gpio>;
++	};
++};
++
++&sgpio {
++	pinctrl-0 = <&sgpio_pins>;
++	pinctrl-names = "default";
++
++	microchip,sgpio-port-ranges = <0 1>, <6 9>;
++	status = "okay";
++
++	gpio@0 {
++		ngpios = <128>;
++	};
++	gpio@1 {
++		ngpios = <128>;
++	};
++};
++
++&serdes {
++	status = "okay";
++};
++
++&lan969x_switch {
++	pinctrl-0 = <&ptp_out_pins>, <&ptp_ext_pins>;
++	pinctrl-names = "default";
++
++	status = "okay";
++	ethernet-ports {
++		#address-cells = <1>;
++		#size-cells = <0>;
++
++		port0: port@0 {
++			reg = <0>;
++			microchip,bandwidth = <1000>;
++			phy-handle = <&phy4>;
++			phy-mode = "qsgmii";
++			phys = <&serdes 0>;
++		};
++
++		port1: port@1 {
++			reg = <1>;
++			microchip,bandwidth = <1000>;
++			phy-handle = <&phy5>;
++			phy-mode = "qsgmii";
++			phys = <&serdes 0>;
++		};
++
++		port2: port@2 {
++			reg = <2>;
++			microchip,bandwidth = <1000>;
++			phy-handle = <&phy6>;
++			phy-mode = "qsgmii";
++			phys = <&serdes 0>;
++		};
++
++		port3: port@3 {
++			reg = <3>;
++			microchip,bandwidth = <1000>;
++			phy-handle = <&phy7>;
++			phy-mode = "qsgmii";
++			phys = <&serdes 0>;
++		};
++
++		port4: port@4 {
++			reg = <4>;
++			microchip,bandwidth = <1000>;
++			phy-handle = <&phy8>;
++			phy-mode = "qsgmii";
++			phys = <&serdes 1>;
++		};
++
++		port5: port@5 {
++			reg = <5>;
++			microchip,bandwidth = <1000>;
++			phy-handle = <&phy9>;
++			phy-mode = "qsgmii";
++			phys = <&serdes 1>;
++		};
++
++		port6: port@6 {
++			reg = <6>;
++			microchip,bandwidth = <1000>;
++			phy-handle = <&phy10>;
++			phy-mode = "qsgmii";
++			phys = <&serdes 1>;
++		};
++
++		port7: port@7 {
++			reg = <7>;
++			microchip,bandwidth = <1000>;
++			phy-handle = <&phy11>;
++			phy-mode = "qsgmii";
++			phys = <&serdes 1>;
++		};
++
++		port8: port@8 {
++			reg = <8>;
++			microchip,bandwidth = <1000>;
++			phy-handle = <&phy12>;
++			phy-mode = "qsgmii";
++			phys = <&serdes 2>;
++		};
++
++		port9: port@9 {
++			reg = <9>;
++			microchip,bandwidth = <1000>;
++			phy-handle = <&phy13>;
++			phy-mode = "qsgmii";
++			phys = <&serdes 2>;
++		};
++
++		port10: port@10 {
++			reg = <10>;
++			microchip,bandwidth = <1000>;
++			phy-handle = <&phy14>;
++			phy-mode = "qsgmii";
++			phys = <&serdes 2>;
++		};
++
++		port11: port@11 {
++			reg = <11>;
++			microchip,bandwidth = <1000>;
++			phy-handle = <&phy15>;
++			phy-mode = "qsgmii";
++			phys = <&serdes 2>;
++		};
++
++		port12: port@12 {
++			reg = <12>;
++			microchip,bandwidth = <1000>;
++			phy-handle = <&phy16>;
++			phy-mode = "qsgmii";
++			phys = <&serdes 3>;
++		};
++
++		port13: port@13 {
++			reg = <13>;
++			microchip,bandwidth = <1000>;
++			phy-handle = <&phy17>;
++			phy-mode = "qsgmii";
++			phys = <&serdes 3>;
++		};
++
++		port14: port@14 {
++			reg = <14>;
++			microchip,bandwidth = <1000>;
++			phy-handle = <&phy18>;
++			phy-mode = "qsgmii";
++			phys = <&serdes 3>;
++		};
++
++		port15: port@15 {
++			reg = <15>;
++			microchip,bandwidth = <1000>;
++			phy-handle = <&phy19>;
++			phy-mode = "qsgmii";
++			phys = <&serdes 3>;
++		};
++
++		port16: port@16 {
++			reg = <16>;
++			microchip,bandwidth = <1000>;
++			phy-handle = <&phy20>;
++			phy-mode = "qsgmii";
++			phys = <&serdes 4>;
++		};
++
++		port17: port@17 {
++			reg = <17>;
++			microchip,bandwidth = <1000>;
++			phy-handle = <&phy21>;
++			phy-mode = "qsgmii";
++			phys = <&serdes 4>;
++		};
++
++		port18: port@18 {
++			reg = <18>;
++			microchip,bandwidth = <1000>;
++			phy-handle = <&phy22>;
++			phy-mode = "qsgmii";
++			phys = <&serdes 4>;
++		};
++
++		port19: port@19 {
++			reg = <19>;
++			microchip,bandwidth = <1000>;
++			phy-handle = <&phy23>;
++			phy-mode = "qsgmii";
++			phys = <&serdes 4>;
++		};
++
++		port20: port@20 {
++			reg = <20>;
++			microchip,bandwidth = <1000>;
++			phy-handle = <&phy24>;
++			phy-mode = "qsgmii";
++			phys = <&serdes 5>;
++		};
++
++		port21: port@21 {
++			reg = <21>;
++			microchip,bandwidth = <1000>;
++			phy-handle = <&phy25>;
++			phy-mode = "qsgmii";
++			phys = <&serdes 5>;
++		};
++
++		port22: port@22 {
++			reg = <22>;
++			microchip,bandwidth = <1000>;
++			phy-handle = <&phy26>;
++			phy-mode = "qsgmii";
++			phys = <&serdes 5>;
++		};
++
++		port23: port@23 {
++			reg = <23>;
++			microchip,bandwidth = <1000>;
++			phy-handle = <&phy27>;
++			phy-mode = "qsgmii";
++			phys = <&serdes 5>;
++		};
++
++		port24: port@24 {
++			reg = <24>;
++			microchip,bandwidth = <10000>;
++			phys = <&serdes 6>;
++			phy-mode = "10gbase-r";
++			sfp = <&sfp0>;
++			microchip,sd-sgpio = <365>;
++			managed = "in-band-status";
++		};
++
++		port25: port@25 {
++			reg = <25>;
++			microchip,bandwidth = <10000>;
++			phys = <&serdes 7>;
++			phy-mode = "10gbase-r";
++			sfp = <&sfp1>;
++			microchip,sd-sgpio = <369>;
++			managed = "in-band-status";
++		};
++
++		port26: port@26 {
++			reg = <26>;
++			microchip,bandwidth = <10000>;
++			phys = <&serdes 8>;
++			phy-mode = "10gbase-r";
++			sfp = <&sfp2>;
++			microchip,sd-sgpio = <373>;
++			managed = "in-band-status";
++		};
++
++		port27: port@27 {
++			reg = <27>;
++			microchip,bandwidth = <10000>;
++			phys = <&serdes 9>;
++			phy-mode = "10gbase-r";
++			sfp = <&sfp3>;
++			microchip,sd-sgpio = <377>;
++			managed = "in-band-status";
++		};
++
++		port29: port@29 {
++			reg = <29>;
++			microchip,bandwidth = <1000>;
++			phy-handle = <&phy3>;
++			phy-mode = "rgmii";
++		};
++	};
++};
+diff --git a/arch/arm64/boot/dts/broadcom/microchip/Makefile b/arch/arm64/boot/dts/broadcom/microchip/Makefile
+new file mode 100644
+index 000000000000..1c1ec590fdcf
+--- /dev/null
++++ b/arch/arm64/boot/dts/broadcom/microchip/Makefile
+@@ -0,0 +1,2 @@
++# SPDX-License-Identifier: GPL-2.0
++dtb-$(CONFIG_ARCH_BCM2835) += bcm2711-microchip-pcb8309.dtb \
+diff --git a/arch/arm64/boot/dts/broadcom/microchip/bcm2711-microchip-pcb8309.dts b/arch/arm64/boot/dts/broadcom/microchip/bcm2711-microchip-pcb8309.dts
+new file mode 100644
+index 000000000000..bd3eb8d0bed1
+--- /dev/null
++++ b/arch/arm64/boot/dts/broadcom/microchip/bcm2711-microchip-pcb8309.dts
+@@ -0,0 +1 @@
++#include "../../../../../arm/boot/dts/broadcom/bcm2711-microchip-pcb8309.dts"
+-- 
+2.43.0
+

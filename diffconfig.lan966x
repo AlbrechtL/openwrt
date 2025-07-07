@@ -1,0 +1,3 @@
+CONFIG_TARGET_lan966x=y
+CONFIG_TARGET_lan966x_generic=y
+CONFIG_TARGET_lan966x_generic_Default=y

@@ -1,0 +1,2752 @@
+From 11e27e15e8462e0ecfe960eab528d889a1103369 Mon Sep 17 00:00:00 2001
+From: Horatiu Vultur <horatiu.vultur@microchip.com>
+Date: Wed, 3 Jan 2024 09:17:55 +0100
+Subject: [PATCH] dts: Add DT used by lan966x
+
+---
+ .../dts/broadcom/bcm2711-rpi-cm4-lan966x.dts  |   6 +-
+ arch/arm/boot/dts/microchip/Makefile          |  12 +-
+ .../dts/microchip/lan9662_hsio_mode_0.dtsi    |  25 ++
+ .../dts/microchip/lan9662_hsio_mode_1.dtsi    |  25 ++
+ .../dts/microchip/lan9662_hsio_mode_2.dtsi    |  26 ++
+ .../dts/microchip/lan9662_hsio_mode_3.dtsi    |  25 ++
+ .../dts/microchip/lan9668_hsio_mode_0.dtsi    |  49 +++
+ .../dts/microchip/lan9668_hsio_mode_1.dtsi    |  49 +++
+ .../dts/microchip/lan9668_hsio_mode_2.dtsi    |  32 ++
+ .../dts/microchip/lan9668_hsio_mode_3.dtsi    |  50 +++
+ .../dts/microchip/lan9668_hsio_mode_8.dtsi    |  43 +++
+ .../dts/microchip/lan966x-appl-pcb8290.dts    | 159 +++++++++
+ .../dts/microchip/lan966x-appl-pcb8291.dts    | 120 +++++++
+ .../dts/microchip/lan966x-appl-pcb8385.dts    | 317 ++++++++++++++++++
+ .../dts/microchip/lan966x-mesa-pcb8281.dts    |  54 +++
+ .../dts/microchip/lan966x-mesa-pcb8290.dts    |  99 ++++++
+ .../dts/microchip/lan966x-mesa-pcb8291.dts    |  76 +++++
+ .../dts/microchip/lan966x-mesa-pcb8309.dts    | 151 +++++++++
+ .../dts/microchip/lan966x-pcb8281-rgmii.dts   |  64 ++++
+ .../boot/dts/microchip/lan966x-pcb8281.dts    |   7 +
+ .../boot/dts/microchip/lan966x-pcb8281.dtsi   |  53 +++
+ .../boot/dts/microchip/lan966x-pcb8290.dts    |  51 +++
+ .../boot/dts/microchip/lan966x-pcb8291.dts    |  67 ++++
+ .../boot/dts/microchip/lan966x-pcb8309.dts    |  78 ++++-
+ .../boot/dts/microchip/lan966x-pcb8385.dts    | 270 +++++++++++++++
+ .../microchip/lan966x-port-delay-pcb8290.dtsi | 207 ++++++++++++
+ .../microchip/lan966x-port-delay-pcb8291.dtsi |  51 +++
+ .../microchip/lan966x-port-delay-pcb8309.dtsi | 103 ++++++
+ arch/arm/boot/dts/microchip/lan966x.dtsi      |  65 +++-
+ 29 files changed, 2328 insertions(+), 6 deletions(-)
+ create mode 100644 arch/arm/boot/dts/microchip/lan9662_hsio_mode_0.dtsi
+ create mode 100644 arch/arm/boot/dts/microchip/lan9662_hsio_mode_1.dtsi
+ create mode 100644 arch/arm/boot/dts/microchip/lan9662_hsio_mode_2.dtsi
+ create mode 100644 arch/arm/boot/dts/microchip/lan9662_hsio_mode_3.dtsi
+ create mode 100644 arch/arm/boot/dts/microchip/lan9668_hsio_mode_0.dtsi
+ create mode 100644 arch/arm/boot/dts/microchip/lan9668_hsio_mode_1.dtsi
+ create mode 100644 arch/arm/boot/dts/microchip/lan9668_hsio_mode_2.dtsi
+ create mode 100644 arch/arm/boot/dts/microchip/lan9668_hsio_mode_3.dtsi
+ create mode 100644 arch/arm/boot/dts/microchip/lan9668_hsio_mode_8.dtsi
+ create mode 100644 arch/arm/boot/dts/microchip/lan966x-appl-pcb8290.dts
+ create mode 100644 arch/arm/boot/dts/microchip/lan966x-appl-pcb8291.dts
+ create mode 100644 arch/arm/boot/dts/microchip/lan966x-appl-pcb8385.dts
+ create mode 100644 arch/arm/boot/dts/microchip/lan966x-mesa-pcb8281.dts
+ create mode 100644 arch/arm/boot/dts/microchip/lan966x-mesa-pcb8290.dts
+ create mode 100644 arch/arm/boot/dts/microchip/lan966x-mesa-pcb8291.dts
+ create mode 100644 arch/arm/boot/dts/microchip/lan966x-mesa-pcb8309.dts
+ create mode 100644 arch/arm/boot/dts/microchip/lan966x-pcb8281-rgmii.dts
+ create mode 100644 arch/arm/boot/dts/microchip/lan966x-pcb8281.dts
+ create mode 100644 arch/arm/boot/dts/microchip/lan966x-pcb8281.dtsi
+ create mode 100644 arch/arm/boot/dts/microchip/lan966x-pcb8385.dts
+ create mode 100644 arch/arm/boot/dts/microchip/lan966x-port-delay-pcb8290.dtsi
+ create mode 100644 arch/arm/boot/dts/microchip/lan966x-port-delay-pcb8291.dtsi
+ create mode 100644 arch/arm/boot/dts/microchip/lan966x-port-delay-pcb8309.dtsi
+
+diff --git a/arch/arm/boot/dts/broadcom/bcm2711-rpi-cm4-lan966x.dts b/arch/arm/boot/dts/broadcom/bcm2711-rpi-cm4-lan966x.dts
+index 676e377a9fb0..858b220bad75 100644
+--- a/arch/arm/boot/dts/broadcom/bcm2711-rpi-cm4-lan966x.dts
++++ b/arch/arm/boot/dts/broadcom/bcm2711-rpi-cm4-lan966x.dts
+@@ -300,12 +300,12 @@ lan966x_phy1: ethernet-lan966x_phy@1 {
+ 			};
+ 
+ 			lan966x_switch: switch@0 {
+-				compatible = "microchip,lan966x-switch";
++				compatible = "microchip,lan966x-pci-switch";
+ 				reg = <0x02000000 0x02000000>, /* BAR0: CSR */
+ 				      <0x00000000 0x01000000>; /* BAR1: CPU */
+ 				reg-names = "gcb", "cpu";
+-				interrupts = <10 11 12 9>;
+-				interrupt-names = "ptp-ext", "ptp", "xtr", "ana";
++				interrupts = <10 11 12 9 14>;
++				interrupt-names = "ptp-ext", "ptp", "xtr", "ana", "fdma";
+ 
+ 				resets = <&switch_reset 0>;
+ 				reset-names = "switch";
+diff --git a/arch/arm/boot/dts/microchip/Makefile b/arch/arm/boot/dts/microchip/Makefile
+index 0c45c8d17468..c52f174ff5fd 100644
+--- a/arch/arm/boot/dts/microchip/Makefile
++++ b/arch/arm/boot/dts/microchip/Makefile
+@@ -96,4 +96,14 @@ dtb-$(CONFIG_SOC_LAN966) += \
+ 	lan966x-kontron-kswitch-d10-mmt-8g.dtb \
+ 	lan966x-pcb8290.dtb \
+ 	lan966x-pcb8291.dtb \
+-	lan966x-pcb8309.dtb
++	lan966x-pcb8309.dtb \
++	lan966x-pcb8281.dtb \
++	lan966x-pcb8281-rgmii.dtb \
++	lan966x-pcb8385.dtb \
++	lan966x-mesa-pcb8291.dtb \
++	lan966x-mesa-pcb8309.dtb \
++	lan966x-mesa-pcb8290.dtb \
++	lan966x-mesa-pcb8281.dtb \
++	lan966x-appl-pcb8290.dtb \
++	lan966x-appl-pcb8291.dtb \
++	lan966x-appl-pcb8385.dtb
+diff --git a/arch/arm/boot/dts/microchip/lan9662_hsio_mode_0.dtsi b/arch/arm/boot/dts/microchip/lan9662_hsio_mode_0.dtsi
+new file mode 100644
+index 000000000000..1e1e0d9f8d29
+--- /dev/null
++++ b/arch/arm/boot/dts/microchip/lan9662_hsio_mode_0.dtsi
+@@ -0,0 +1,25 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++
++&port0 {
++	reg = <0>;
++	phy-mode = "qsgmii";
++	phys = <&serdes 0 SERDES6G(1)>;
++};
++
++&port1 {
++	reg = <1>;
++	phy-mode = "qsgmii";
++	phys = <&serdes 1 SERDES6G(1)>;
++};
++
++&port2 {
++	reg = <2>;
++	phy-mode = "qsgmii";
++	phys = <&serdes 2 SERDES6G(1)>;
++};
++
++&port3 {
++	reg = <3>;
++	phy-mode = "qsgmii";
++	phys = <&serdes 3 SERDES6G(1)>;
++};
+diff --git a/arch/arm/boot/dts/microchip/lan9662_hsio_mode_1.dtsi b/arch/arm/boot/dts/microchip/lan9662_hsio_mode_1.dtsi
+new file mode 100644
+index 000000000000..cc389b7f809f
+--- /dev/null
++++ b/arch/arm/boot/dts/microchip/lan9662_hsio_mode_1.dtsi
+@@ -0,0 +1,25 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++
++&port0 {
++	reg = <0>;
++	phy-mode = "gmii";
++	phys = <&serdes 0 CU(0)>;
++};
++
++&port1 {
++	reg = <1>;
++	phy-mode = "gmii";
++	phys = <&serdes 1 CU(1)>;
++};
++
++&port2 {
++	reg = <2>;
++	phy-mode = "sgmii";
++	phys = <&serdes 2 SERDES6G(0)>;
++};
++
++&port3 {
++	reg = <3>;
++	phy-mode = "sgmii";
++	phys = <&serdes 3 SERDES6G(1)>;
++};
+diff --git a/arch/arm/boot/dts/microchip/lan9662_hsio_mode_2.dtsi b/arch/arm/boot/dts/microchip/lan9662_hsio_mode_2.dtsi
+new file mode 100644
+index 000000000000..856e08bd86c3
+--- /dev/null
++++ b/arch/arm/boot/dts/microchip/lan9662_hsio_mode_2.dtsi
+@@ -0,0 +1,26 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++
++/* Ports 0 and 1 are dual media ports - for now connect only to CU */
++&port0 {
++	reg = <0>;
++	phy-mode = "gmii";
++	phys = <&serdes 0 CU(0)>;
++};
++
++&port1 {
++	reg = <1>;
++	phy-mode = "gmii";
++	phys = <&serdes 1 CU(1)>;
++};
++
++&port2 {
++	reg = <2>;
++	phy-mode = "rgmii";
++	phys = <&serdes 2 RG(0)>;
++};
++
++&port3 {
++	reg = <3>;
++	phy-mode = "rgmii";
++	phys = <&serdes 3 RG(1)>;
++};
+diff --git a/arch/arm/boot/dts/microchip/lan9662_hsio_mode_3.dtsi b/arch/arm/boot/dts/microchip/lan9662_hsio_mode_3.dtsi
+new file mode 100644
+index 000000000000..da9b5f4fb6eb
+--- /dev/null
++++ b/arch/arm/boot/dts/microchip/lan9662_hsio_mode_3.dtsi
+@@ -0,0 +1,25 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++
++&port0 {
++	reg = <0>;
++	phy-mode = "sgmii";
++	phys = <&serdes 0 SERDES6G(0)>;
++};
++
++&port1 {
++	reg = <1>;
++	phy-mode = "sgmii";
++	phys = <&serdes 1 SERDES6G(1)>;
++};
++
++&port2 {
++	reg = <2>;
++	phy-mode = "rgmii";
++	phys = <&serdes 2 RG(0)>;
++};
++
++&port3 {
++	reg = <3>;
++	phy-mode = "rgmii";
++	phys = <&serdes 3 RG(1)>;
++};
+diff --git a/arch/arm/boot/dts/microchip/lan9668_hsio_mode_0.dtsi b/arch/arm/boot/dts/microchip/lan9668_hsio_mode_0.dtsi
+new file mode 100644
+index 000000000000..b700e0c3c42d
+--- /dev/null
++++ b/arch/arm/boot/dts/microchip/lan9668_hsio_mode_0.dtsi
+@@ -0,0 +1,49 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++
++&port0 {
++	reg = <0>;
++	phy-mode = "qsgmii";
++	phys = <&serdes 0 SERDES6G(1)>;
++};
++
++&port1 {
++	reg = <1>;
++	phy-mode = "qsgmii";
++	phys = <&serdes 1 SERDES6G(1)>;
++};
++
++&port2 {
++	reg = <2>;
++	phy-mode = "qsgmii";
++	phys = <&serdes 2 SERDES6G(1)>;
++};
++
++&port3 {
++	reg = <3>;
++	phy-mode = "qsgmii";
++	phys = <&serdes 3 SERDES6G(1)>;
++};
++
++&port4 {
++	reg = <4>;
++	phy-mode = "qsgmii";
++	phys = <&serdes 4 SERDES6G(2)>;
++};
++
++&port5 {
++	reg = <5>;
++	phy-mode = "qsgmii";
++	phys = <&serdes 5 SERDES6G(2)>;
++};
++
++&port6 {
++	reg = <6>;
++	phy-mode = "qsgmii";
++	phys = <&serdes 6 SERDES6G(2)>;
++};
++
++&port7 {
++	reg = <7>;
++	phy-mode = "qsgmii";
++	phys = <&serdes 7 SERDES6G(2)>;
++};
+diff --git a/arch/arm/boot/dts/microchip/lan9668_hsio_mode_1.dtsi b/arch/arm/boot/dts/microchip/lan9668_hsio_mode_1.dtsi
+new file mode 100644
+index 000000000000..8effa82d4989
+--- /dev/null
++++ b/arch/arm/boot/dts/microchip/lan9668_hsio_mode_1.dtsi
+@@ -0,0 +1,49 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++
++&port0 {
++	reg = <0>;
++	phy-mode = "gmii";
++	phys = <&serdes 0 CU(0)>;
++};
++
++&port1 {
++	reg = <1>;
++	phy-mode = "gmii";
++	phys = <&serdes 1 CU(1)>;
++};
++
++&port2 {
++	reg = <2>;
++	phy-mode = "sgmii";
++	phys = <&serdes 2 SERDES6G(0)>;
++};
++
++&port3 {
++	reg = <3>;
++	phy-mode = "sgmii";
++	phys = <&serdes 3 SERDES6G(1)>;
++};
++
++&port4 {
++	reg = <4>;
++	phy-mode = "qsgmii";
++	phys = <&serdes 4 SERDES6G(2)>;
++};
++
++&port5 {
++	reg = <5>;
++	phy-mode = "qsgmii";
++	phys = <&serdes 5 SERDES6G(2)>;
++};
++
++&port6 {
++	reg = <6>;
++	phy-mode = "qsgmii";
++	phys = <&serdes 6 SERDES6G(2)>;
++};
++
++&port7 {
++	reg = <7>;
++	phy-mode = "qsgmii";
++	phys = <&serdes 7 SERDES6G(2)>;
++};
+diff --git a/arch/arm/boot/dts/microchip/lan9668_hsio_mode_2.dtsi b/arch/arm/boot/dts/microchip/lan9668_hsio_mode_2.dtsi
+new file mode 100644
+index 000000000000..666e09731f96
+--- /dev/null
++++ b/arch/arm/boot/dts/microchip/lan9668_hsio_mode_2.dtsi
+@@ -0,0 +1,32 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++
++/* Ports 0 and 1 are dual media ports - for now connect only to CU */
++&port0 {
++	reg = <0>;
++	phy-mode = "gmii";
++	phys = <&serdes 0 CU(0)>;
++};
++
++&port1 {
++	reg = <1>;
++	phy-mode = "gmii";
++	phys = <&serdes 1 CU(1)>;
++};
++
++&port2 {
++	reg = <2>;
++	phy-mode = "rgmii";
++	phys = <&serdes 2 RG(0)>;
++};
++
++&port3 {
++	reg = <3>;
++	phy-mode = "rgmii";
++	phys = <&serdes 3 RG(1)>;
++};
++
++&port4 {
++	reg = <4>;
++	phy-mode = "sgmii";
++	phys = <&serdes 4 SERDES6G(2)>;
++};
+diff --git a/arch/arm/boot/dts/microchip/lan9668_hsio_mode_3.dtsi b/arch/arm/boot/dts/microchip/lan9668_hsio_mode_3.dtsi
+new file mode 100644
+index 000000000000..b16ee6fa846f
+--- /dev/null
++++ b/arch/arm/boot/dts/microchip/lan9668_hsio_mode_3.dtsi
+@@ -0,0 +1,50 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++
++/* Ports 0 and 1 are dual media ports - for now connect only to CU */
++&port0 {
++	reg = <0>;
++	phy-mode = "gmii";
++	phys = <&serdes 0 CU(0)>;
++};
++
++&port1 {
++	reg = <1>;
++	phy-mode = "gmii";
++	phys = <&serdes 1 CU(1)>;
++};
++
++&port2 {
++	reg = <2>;
++	phy-mode = "rgmii";
++	phys = <&serdes 2 RG(0)>;
++};
++
++&port3 {
++	reg = <3>;
++	phy-mode = "rgmii";
++	phys = <&serdes 3 RG(1)>;
++};
++
++&port4 {
++	reg = <4>;
++	phy-mode = "qsgmii";
++	phys = <&serdes 4 SERDES6G(2)>;
++};
++
++&port5 {
++	reg = <5>;
++	phy-mode = "qsgmii";
++	phys = <&serdes 5 SERDES6G(2)>;
++};
++
++&port6 {
++	reg = <6>;
++	phy-mode = "qsgmii";
++	phys = <&serdes 6 SERDES6G(2)>;
++};
++
++&port7 {
++	reg = <7>;
++	phy-mode = "qsgmii";
++	phys = <&serdes 7 SERDES6G(2)>;
++};
+diff --git a/arch/arm/boot/dts/microchip/lan9668_hsio_mode_8.dtsi b/arch/arm/boot/dts/microchip/lan9668_hsio_mode_8.dtsi
+new file mode 100644
+index 000000000000..6a284387ca11
+--- /dev/null
++++ b/arch/arm/boot/dts/microchip/lan9668_hsio_mode_8.dtsi
+@@ -0,0 +1,43 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++
++&port0 {
++	reg = <0>;
++	phy-mode = "gmii";
++	phys = <&serdes 0 CU(0)>;
++};
++
++&port1 {
++	reg = <1>;
++	phy-mode = "gmii";
++	phys = <&serdes 1 CU(1)>;
++};
++
++&port2 {
++	reg = <2>;
++	phy-mode = "sgmii";
++	phys = <&serdes 2 SERDES6G(0)>;
++};
++
++&port3 {
++	reg = <3>;
++	phy-mode = "sgmii";
++	phys = <&serdes 3 SERDES6G(1)>;
++};
++
++&port4 {
++	reg = <4>;
++	phy-mode = "sgmii";
++	phys = <&serdes 4 SERDES6G(2)>;
++};
++
++&port5 {
++	reg = <5>;
++	phy-mode = "gmii";
++	phys = <&serdes 5 RG(0)>;
++};
++
++&port6 {
++	reg = <6>;
++	phy-mode = "gmii";
++	phys = <&serdes 5 RG(1)>;
++};
+diff --git a/arch/arm/boot/dts/microchip/lan966x-appl-pcb8290.dts b/arch/arm/boot/dts/microchip/lan966x-appl-pcb8290.dts
+new file mode 100644
+index 000000000000..3f3a45528bf0
+--- /dev/null
++++ b/arch/arm/boot/dts/microchip/lan966x-appl-pcb8290.dts
+@@ -0,0 +1,159 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * lan966x-appl-pcb8290.dts - Device Tree file for PCB8290
++ */
++/dts-v1/;
++#include "lan966x.dtsi"
++
++/ {
++	model = "Microchip LAN966X";
++	compatible = "microchip,lan966x-sunrise", "microchip,lan966x";
++
++	aliases {
++		spi0 = &qspi0;
++		spi1 = &spi;
++	};
++
++	gpio-restart {
++		compatible = "gpio-restart";
++		gpios = <&gpio 56 GPIO_ACTIVE_LOW>;
++		priority = <200>;
++	};
++};
++
++&aes {
++	status = "disabled"; /* Reserved by secure OS */
++};
++
++&flx3 {
++	compatible = "microchip,lan966x-flexcom";
++	reg = <0xe0064000 0x00000100>, <0xe2004180 0x00000008>;
++	atmel,flexcom-mode = <ATMEL_FLEXCOM_MODE_SPI>;
++	microchip,flx-shrd-pins = <4>;
++	microchip,flx-cs = <0>;
++	status = "okay";
++
++	spi: spi@400 {
++		compatible = "atmel,at91rm9200-spi";
++		reg = <0x400 0x200>;
++		interrupts = <GIC_SPI 51 IRQ_TYPE_LEVEL_HIGH>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++		clocks = <&clks GCK_ID_FLEXCOM3>;
++		clock-names = "spi_clk";
++		assigned-clocks = <&clks GCK_ID_FLEXCOM3>;
++		assigned-clock-rates = <200000000>;
++		pinctrl-0 = <&fc3_a_pins>, <&fc_shrd4_pins>;
++		pinctrl-names = "default";
++		atmel,fifo-size = <32>;
++		status = "okay";
++
++		spi@0 {
++			compatible = "mchp,synce_dpll";
++			reg = <0>;
++			spi-max-frequency = <8000000>;
++		};
++	};
++};
++
++&gpio {
++	udc_pins: ucd-pins {
++		/* VBUS_DET B */
++		pins = "GPIO_8";
++		function = "usb_slave_b";
++	};
++
++	fc3_a_pins: fca3_spi-pins {
++		/* SCK, RXD, TXD */
++		pins = "GPIO_17", "GPIO_18", "GPIO_19";
++		function = "fc3_a";
++	};
++
++	fc_shrd4_pins: fc_shrd4-pins {
++		pins = "GPIO_46";
++		function = "fc_shrd4";
++	};
++
++	emmc_sd_pins: emmc-sd-pins {
++		/* eMMC_SD - CMD, CLK, D0, D1, D2, D3, RSTN */
++		pins = "GPIO_67", "GPIO_68", "GPIO_69", "GPIO_70",
++			"GPIO_71", "GPIO_72", "GPIO_77";
++		function = "emmc_sd";
++	};
++
++	emmc_pins: emmc-pins {
++		/* eMMC - D4, D5, D6, D7 */
++		pins = "GPIO_73", "GPIO_74", "GPIO_75", "GPIO_76";
++		function = "emmc";
++	};
++};
++
++&gpio {
++	/delete-property/ interrupts;
++	/delete-property/ interrupt-controller;
++	/delete-property/ #interrupt-cells;
++};
++
++&qspi0 {
++	status = "okay";
++
++	spi-flash@0 {
++		compatible = "jedec,spi-nor";
++		reg = <0>;
++		spi-max-frequency = <104000000>;
++		#address-cells = <1>;
++		#size-cells = <1>;
++		spi-tx-bus-width = <4>;
++		spi-rx-bus-width = <4>;
++		m25p,fast-read;
++	};
++};
++
++&sdmmc0 {
++	bus-width = <8>;
++	cap-mmc-highspeed;
++	cap-mmc-hw-reset;
++	non-removable;
++	pinctrl-0 = <&emmc_sd_pins>, <&emmc_pins>;
++	pinctrl-names = "default";
++	no-1-8-v;
++	tx-phase = <0>; /* 180 degrees phase shift */
++	status = "okay";
++};
++
++&soc {
++	lan966x_switch_vtss: switch_vtss@0 {
++		compatible = "mchp,lan966x-switch-appl";
++		reg = <0xe2008000 0x0000004c>;
++		reg-names = "qs";
++
++		interrupts = <GIC_SPI 12 IRQ_TYPE_LEVEL_HIGH>;
++		interrupt-names = "xtr";
++	};
++
++	ifmux: switch_ifmux@0 {
++		compatible = "microchip,lan966x-ifmux";
++		status = "okay";
++	};
++};
++
++&udc {
++	pinctrl-0 = <&udc_pins>;
++	pinctrl-names = "default";
++	atmel,vbus-gpio = <&gpio 8 GPIO_ACTIVE_HIGH>;
++	status = "okay";
++};
++
++&uio0 {
++	interrupts = <GIC_SPI 19 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 10 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 11 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI  9 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 80 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 81 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 18 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 17 IRQ_TYPE_LEVEL_HIGH>;
++	interrupt-names = "master", "ptp_sync", "ptp_rdy",
++			  "oam_vop", "cu_phy0", "cu_phy1",
++			  "sgpio", "gpio";
++};
+diff --git a/arch/arm/boot/dts/microchip/lan966x-appl-pcb8291.dts b/arch/arm/boot/dts/microchip/lan966x-appl-pcb8291.dts
+new file mode 100644
+index 000000000000..f1359fb36b37
+--- /dev/null
++++ b/arch/arm/boot/dts/microchip/lan966x-appl-pcb8291.dts
+@@ -0,0 +1,120 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * lan966x-appl-pcb8291.dts - Device Tree file for PCB8291
++ */
++/dts-v1/;
++#include "lan966x.dtsi"
++
++/ {
++	model = "Microchip LAN966X";
++	compatible = "microchip,lan9662-pcb8291", "microchip,lan9662", "microchip,lan966";
++
++	aliases {
++		serial0 = &usart3;
++	};
++
++	gpio-restart {
++		compatible = "gpio-restart";
++		gpios = <&gpio 56 GPIO_ACTIVE_LOW>;
++		priority = <200>;
++	};
++};
++
++&aes {
++	status = "disabled"; /* Reserved by secure OS */
++};
++
++&flx3 {
++	atmel,flexcom-mode = <ATMEL_FLEXCOM_MODE_USART>;
++	status = "okay";
++
++	usart3: serial@200 {
++		pinctrl-0 = <&fc3_b_pins>;
++		pinctrl-names = "default";
++		status = "okay";
++	};
++};
++
++&gpio {
++	fc3_b_pins: fc3-b-pins {
++		/* RXD, TXD */
++		pins = "GPIO_52", "GPIO_53";
++		function = "fc3_b";
++	};
++
++	emmc_sd_pins: emmc-sd-pins {
++		/* eMMC_SD - CMD, CLK, D0, D1, D2, D3, RSTN */
++		pins = "GPIO_67", "GPIO_68", "GPIO_69", "GPIO_70",
++			"GPIO_71", "GPIO_72", "GPIO_77";
++		function = "emmc_sd";
++	};
++
++	emmc_pins: emmc-pins {
++		/* eMMC - D4, D5, D6, D7 */
++		pins = "GPIO_73", "GPIO_74", "GPIO_75", "GPIO_76";
++		function = "emmc";
++	};
++};
++
++&gpio {
++	/delete-property/ interrupts;
++	/delete-property/ interrupt-controller;
++	/delete-property/ #interrupt-cells;
++};
++
++&qspi0 {
++	status = "okay";
++
++	spi-flash@0 {
++		compatible = "jedec,spi-nor";
++		reg = <0>;
++		spi-max-frequency = <104000000>;
++		#address-cells = <1>;
++		#size-cells = <1>;
++		spi-tx-bus-width = <4>;
++		spi-rx-bus-width = <4>;
++		m25p,fast-read;
++	};
++};
++
++&sdmmc0 {
++	bus-width = <8>;
++	cap-mmc-highspeed;
++	cap-mmc-hw-reset;
++	non-removable;
++	pinctrl-0 = <&emmc_sd_pins>, <&emmc_pins>;
++	pinctrl-names = "default";
++	no-1-8-v;
++	tx-phase = <0>; /* 180 degrees phase shift */
++	status = "okay";
++};
++
++&soc {
++	lan966x_switch_vtss: switch_vtss@0 {
++		compatible = "mchp,lan966x-switch-appl";
++		reg = <0xe2008000 0x0000004c>;
++		reg-names = "qs";
++
++		interrupts = <GIC_SPI 12 IRQ_TYPE_LEVEL_HIGH>;
++		interrupt-names = "xtr";
++	};
++
++	ifmux: switch_ifmux@0 {
++		compatible = "microchip,lan966x-ifmux";
++		status = "okay";
++	};
++};
++
++&uio0 {
++	interrupts = <GIC_SPI 19 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 10 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 11 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI  9 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 80 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 81 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 18 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 17 IRQ_TYPE_LEVEL_HIGH>;
++	interrupt-names = "master", "ptp_sync", "ptp_rdy",
++			  "oam_vop", "cu_phy0", "cu_phy1",
++			  "sgpio", "gpio";
++};
+diff --git a/arch/arm/boot/dts/microchip/lan966x-appl-pcb8385.dts b/arch/arm/boot/dts/microchip/lan966x-appl-pcb8385.dts
+new file mode 100644
+index 000000000000..734ae33dde76
+--- /dev/null
++++ b/arch/arm/boot/dts/microchip/lan966x-appl-pcb8385.dts
+@@ -0,0 +1,317 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * lan966x-appl-pcb8385.dts - Device Tree file for PCB8385
++ */
++/dts-v1/;
++#include "lan966x.dtsi"
++
++/ {
++	model = "Microchip LAN966X";
++	compatible = "microchip,lan966x-sunrise", "microchip,lan966x";
++
++	chosen {
++		stdout-path = "serial0:115200n8";
++	};
++
++	aliases {
++		serial0 = &usart3;
++		serial1 = &usart2;
++	};
++
++	leds {
++		compatible = "gpio-leds";
++
++		led-p1-green {
++			label = "cu0:green";
++			gpios = <&sgpio_out 2 0 GPIO_ACTIVE_LOW>;
++			default-state = "off";
++			linux,default-trigger = "e200413c.mdio-mii:01:link";
++		};
++
++		led-p1-yellow {
++			label = "cu0:yellow";
++			gpios = <&sgpio_out 2 1 GPIO_ACTIVE_LOW>;
++			default-state = "off";
++		};
++
++		led-p2-green {
++			label = "cu1:green";
++			gpios = <&sgpio_out 3 0 GPIO_ACTIVE_LOW>;
++			default-state = "off";
++			linux,default-trigger = "e200413c.mdio-mii:02:link";
++		};
++
++		led-p2-yellow {
++			label = "cu1:yellow";
++			gpios = <&sgpio_out 3 1 GPIO_ACTIVE_LOW>;
++			default-state = "off";
++		};
++	};
++
++	gpio-restart {
++		compatible = "gpio-restart";
++		gpios = <&gpio 59 GPIO_ACTIVE_LOW>;
++		open-source;
++		priority = <200>;
++	};
++};
++
++&gpio {
++	emmc_sd_pins: emmc-sd-pins {
++		/* eMMC_SD - CMD, CLK, D0, D1, D2, D3, RSTN */
++		pins = "GPIO_67", "GPIO_68", "GPIO_69", "GPIO_70",
++			"GPIO_71", "GPIO_72", "GPIO_77";
++		function = "emmc_sd";
++	};
++
++	emmc_pins: emmc-pins {
++		/* eMMC - D4, D5, D6, D7 */
++		pins = "GPIO_73", "GPIO_74", "GPIO_75", "GPIO_76";
++		function = "emmc";
++	};
++
++	fc0_b_pins: fc0-b-pins {
++		/* SCL, SDA */
++		pins = "GPIO_25", "GPIO_26";
++		function = "fc0_b";
++	};
++
++	fc1_c_pins: fc1-c-rxd-pins {
++		pins = "GPIO_47", "GPIO_48";
++		function = "fc1_c";
++	};
++
++	fc2_b_pins: fc2-b-pins {
++		/* RX, TX */
++		pins = "GPIO_44", "GPIO_45";
++		function = "fc2_b";
++	};
++
++	fc3_b_pins: fc3-b-pins {
++		/* RXD, TXD */
++		pins = "GPIO_52", "GPIO_53";
++		function = "fc3_b";
++	};
++
++	fc4_b_pins: fc4-b-pins {
++		/* SCK, MISO, MOSI */
++		pins = "GPIO_56", "GPIO_57", "GPIO_58";
++		function = "fc4_b";
++	};
++
++	sgpio_a_pins: sgpio-a-pins {
++		/* SCK, D0, D1, LD */
++		pins = "GPIO_32", "GPIO_33", "GPIO_34", "GPIO_35";
++		function = "sgpio_a";
++	};
++
++	usb_host_a_pins: usb_host_a_pins {
++		pins = "GPIO_65", "GPIO_66";
++		function = "usb_host_a";
++	};
++
++	fc_shrd7_pins: fc-shrd7-pins {
++		/* CS1N */
++		pins = "GPIO_49";
++		function = "fc_shrd7";
++	};
++
++	fc_shrd8_pins: fc-shrd8-pins {
++		/* CS2N */
++		pins = "GPIO_54";
++		function = "fc_shrd8";
++	};
++};
++
++&aes {
++	status = "disabled"; /* Reserved by secure OS */
++};
++
++&gpio {
++	/delete-property/ interrupts;
++	/delete-property/ interrupt-controller;
++	/delete-property/ #interrupt-cells;
++};
++
++&flx0 {
++	atmel,flexcom-mode = <ATMEL_FLEXCOM_MODE_TWI>;
++	status = "okay";
++
++	i2c0: i2c@600 {
++		pinctrl-0 = <&fc0_b_pins>;
++		pinctrl-names = "default";
++		dmas = <0>, <0>;
++		i2c-analog-filter;
++		i2c-digital-filter;
++		i2c-digital-filter-width-ns = <35>;
++		i2c-sda-hold-time-ns = <1500>;
++		status = "okay";
++	};
++};
++
++&flx1 {
++	atmel,flexcom-mode = <ATMEL_FLEXCOM_MODE_TWI>;
++	status = "okay";
++
++	i2c1: i2c@600 {
++		pinctrl-0 = <&fc1_c_pins>;
++		pinctrl-names = "default";
++		dmas = <0>, <0>;
++		i2c-analog-filter;
++		i2c-digital-filter;
++		i2c-digital-filter-width-ns = <35>;
++		i2c-sda-hold-time-ns = <1500>;
++		status = "okay";
++	};
++};
++
++&flx2 {
++	atmel,flexcom-mode = <ATMEL_FLEXCOM_MODE_USART>;
++	status = "okay";
++
++	usart2: serial@200 {
++		pinctrl-0 = <&fc2_b_pins>;
++		pinctrl-names = "default";
++		status = "okay";
++	};
++};
++
++&flx3 {
++	atmel,flexcom-mode = <ATMEL_FLEXCOM_MODE_USART>;
++	status = "okay";
++
++	usart3: serial@200 {
++		pinctrl-0 = <&fc3_b_pins>;
++		pinctrl-names = "default";
++		status = "okay";
++	};
++};
++
++&flx4 {
++	compatible = "microchip,lan966x-flexcom";
++	reg = <0xe0070000 0x100>, <0xe2004188 0x8>;
++	atmel,flexcom-mode = <ATMEL_FLEXCOM_MODE_SPI>;
++	microchip,flx-shrd-pins = <7>, <8>;
++	microchip,flx-cs = <0>, <1>;
++	status = "okay";
++
++	spi: spi@400 {
++		compatible = "atmel,at91rm9200-spi";
++		reg = <0x400 0x200>;
++		interrupts = <GIC_SPI 52 IRQ_TYPE_LEVEL_HIGH>;
++		clocks = <&nic_clk>;
++		clock-names = "spi_clk";
++		#address-cells = <1>;
++		#size-cells = <0>;
++		pinctrl-0 = <&fc4_b_pins>, <&fc_shrd7_pins> ,<&fc_shrd8_pins>;
++		pinctrl-names = "default";
++		atmel,fifo-size = <32>;
++		status = "okay";
++
++		spi@0 {
++			compatible = "mchp,synce_dpll";
++			reg = <0>;
++			spi-max-frequency = <8000000>;
++		};
++
++		spi@1 {
++			compatible = "mchp,synce_dpll";
++			reg = <1>;
++			spi-max-frequency = <8000000>;
++		};
++	};
++};
++
++&i2c0 {
++	eeprom@54 {
++		compatible = "atmel,24c01";
++		reg = <0x54>;
++		status = "okay";
++	};
++
++	eeprom@55 {
++		compatible = "atmel,24c01";
++		reg = <0x55>;
++		status = "okay";
++	};
++
++	/* UCS2113 at 0x57 */
++};
++
++&qspi0 {
++	status = "okay";
++
++	spi-flash@0 {
++		compatible = "jedec,spi-nor";
++		reg = <0>;
++		spi-max-frequency = <20000000>;
++		#address-cells = <1>;
++		#size-cells = <1>;
++		spi-tx-bus-width = <4>;
++		spi-rx-bus-width = <4>;
++		m25p,fast-read;
++	};
++};
++
++&sdmmc0 {
++	bus-width = <8>;
++	cap-mmc-highspeed;
++	cap-mmc-hw-reset;
++	non-removable;
++	pinctrl-0 = <&emmc_sd_pins>, <&emmc_pins>;
++	pinctrl-names = "default";
++	no-1-8-v;
++	mmc-ddr-3_3v;
++	tx-phase = <0>; /* 180 degrees phase shift */
++	status = "okay";
++};
++
++&sgpio {
++	pinctrl-0 = <&sgpio_a_pins>;
++	pinctrl-names = "default";
++	microchip,sgpio-port-ranges = <0 3>;
++	status = "okay";
++	gpio@0 {
++		ngpios = <64>;
++	};
++	gpio@1 {
++		ngpios = <64>;
++	};
++};
++
++&usb {
++	dr_mode = "host";
++	pinctrl-0 = <&usb_host_a_pins>;
++	pinctrl-names = "default";
++	status = "okay";
++};
++
++&soc {
++	lan966x_switch_vtss: switch_vtss@0 {
++		compatible = "mchp,lan966x-switch-appl";
++		reg = <0xe2008000 0x0000004c>;
++		reg-names = "qs";
++
++		interrupts = <GIC_SPI 12 IRQ_TYPE_LEVEL_HIGH>;
++		interrupt-names = "xtr";
++	};
++
++	ifmux: switch_ifmux@0 {
++		compatible = "microchip,lan966x-ifmux";
++		status = "okay";
++	};
++};
++
++&uio0 {
++	interrupts = <GIC_SPI 19 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 10 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 11 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI  9 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 80 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 81 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 18 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 17 IRQ_TYPE_LEVEL_HIGH>;
++	interrupt-names = "master", "ptp_sync", "ptp_rdy",
++			  "oam_vop", "cu_phy0", "cu_phy1",
++			  "sgpio", "gpio";
++};
+diff --git a/arch/arm/boot/dts/microchip/lan966x-mesa-pcb8281.dts b/arch/arm/boot/dts/microchip/lan966x-mesa-pcb8281.dts
+new file mode 100644
+index 000000000000..e39b4d8428bb
+--- /dev/null
++++ b/arch/arm/boot/dts/microchip/lan966x-mesa-pcb8281.dts
+@@ -0,0 +1,54 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * lan966x-mesa-pcb8281.dts - Device Tree file for PCB8281
++ */
++/dts-v1/;
++#include "lan966x.dtsi"
++
++/ {
++	model = "Microchip LAN966X";
++	compatible = "microchip,lan966x-sunrise", "microchip,lan966x";
++};
++
++&gpio {
++	fc0_b_pins: usart-pins {
++		/* SCK, RXD, TXD */
++		pins = "GPIO_24", "GPIO_25", "GPIO_26";
++		function = "fc0_b";
++	};
++};
++
++&flx0 {
++	atmel,flexcom-mode = <ATMEL_FLEXCOM_MODE_USART>;
++	status = "okay";
++
++	usart0: serial@200 {
++		compatible = "atmel,at91sam9260-usart";
++		reg = <0x200 0x200>;
++		interrupts = <GIC_SPI 48 IRQ_TYPE_LEVEL_HIGH>;
++		clocks = <&nic_clk>;
++		clock-names = "usart";
++		pinctrl-0 = <&fc0_b_pins>;
++		pinctrl-names = "default";
++		dmas = <&dma0 AT91_XDMAC_DT_PERID(2)>,
++		       <&dma0 AT91_XDMAC_DT_PERID(3)>;
++		dma-names = "rx", "tx";
++		atmel,use-dma-rx;
++		atmel,use-dma-tx;
++		atmel,fifo-size = <32>;
++		status = "okay";
++	};
++};
++
++&uio0 {
++	interrupts = <GIC_SPI 19 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 10 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 11 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI  9 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 80 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 81 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 18 IRQ_TYPE_LEVEL_HIGH>;
++	interrupt-names = "master", "ptp_sync", "ptp_rdy",
++			  "oam_vop", "cu_phy0", "cu_phy1",
++			  "sgpio";
++};
+diff --git a/arch/arm/boot/dts/microchip/lan966x-mesa-pcb8290.dts b/arch/arm/boot/dts/microchip/lan966x-mesa-pcb8290.dts
+new file mode 100644
+index 000000000000..ae8c3a37c557
+--- /dev/null
++++ b/arch/arm/boot/dts/microchip/lan966x-mesa-pcb8290.dts
+@@ -0,0 +1,99 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * lan966x-mesa-pcb8290.dts - Device Tree file for PCB8290
++ */
++/dts-v1/;
++#include "lan966x.dtsi"
++
++/ {
++	model = "Microchip LAN966X";
++	compatible = "microchip,lan966x-sunrise", "microchip,lan966x";
++
++	gpio-restart {
++		compatible = "gpio-restart";
++		gpios = <&gpio 56 GPIO_ACTIVE_LOW>;
++		priority = <200>;
++	};
++};
++
++&aes {
++	status = "disabled"; /* Reserved by secure OS */
++};
++
++&flx3 {
++	compatible = "atmel,sama5d2-flexcom";
++	reg = <0xe0064000 0x00000100>,
++	      <0xe2004180 0x00000008>;
++	atmel,flexcom-mode = <ATMEL_FLEXCOM_MODE_SPI>;
++	microchip,flx-shrd-pins = <4>;
++	microchip,flx-cs = <0>;
++	status = "okay";
++
++	spi3: spi@400 {
++		compatible = "atmel,at91rm9200-spi";
++		reg = <0x400 0x200>;
++		interrupts = <GIC_SPI 51 IRQ_TYPE_LEVEL_HIGH>;
++		#address-cells = <1>;
++		#size-cells = <0>;
++		clocks = <&clks GCK_ID_FLEXCOM3>;
++		clock-names = "spi_clk";
++		assigned-clocks = <&clks GCK_ID_FLEXCOM3>;
++		assigned-clock-rates = <200000000>;
++		pinctrl-0 = <&fc3_a_pins>, <&fc_shrd4_pins>;
++		pinctrl-names = "default";
++		atmel,fifo-size = <32>;
++		status = "okay";
++
++		spi@0 {
++			compatible = "mchp,synce_dpll";
++			reg = <0>;
++			spi-max-frequency = <12000000>;
++		};
++	};
++};
++
++&gpio {
++	udc_pins: ucd-pins {
++		/* VBUS_DET B */
++		pins = "GPIO_8";
++		function = "usb_slave_b";
++	};
++
++	fc3_a_pins: fca3_spi-pins {
++		/* SCK, RXD, TXD */
++		pins = "GPIO_17", "GPIO_18", "GPIO_19";
++		function = "fc3_a";
++	};
++
++	fc_shrd4_pins: fc_shrd4-pins {
++		pins = "GPIO_46";
++		function = "fc_shrd4";
++	};
++};
++
++&gpio {
++	/delete-property/ interrupts;
++	/delete-property/ interrupt-controller;
++	/delete-property/ #interrupt-cells;
++};
++
++&udc {
++	pinctrl-0 = <&udc_pins>;
++	pinctrl-names = "default";
++	atmel,vbus-gpio = <&gpio 8 GPIO_ACTIVE_HIGH>;
++	status = "okay";
++};
++
++&uio0 {
++	interrupts = <GIC_SPI 19 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 10 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 11 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI  9 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 80 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 81 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 18 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 17 IRQ_TYPE_LEVEL_HIGH>;
++	interrupt-names = "master", "ptp_sync", "ptp_rdy",
++			  "oam_vop", "cu_phy0", "cu_phy1",
++			  "sgpio", "gpio";
++};
+diff --git a/arch/arm/boot/dts/microchip/lan966x-mesa-pcb8291.dts b/arch/arm/boot/dts/microchip/lan966x-mesa-pcb8291.dts
+new file mode 100644
+index 000000000000..b74422ce2e5a
+--- /dev/null
++++ b/arch/arm/boot/dts/microchip/lan966x-mesa-pcb8291.dts
+@@ -0,0 +1,76 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * lan966x-mesa-pcb8291.dts - Device Tree file for PCB8291
++ */
++/dts-v1/;
++#include "lan966x.dtsi"
++
++/ {
++	model = "Microchip LAN966X";
++	compatible = "microchip,lan966x-sunrise", "microchip,lan966x";
++
++	gpio-restart {
++		compatible = "gpio-restart";
++		gpios = <&gpio 56 GPIO_ACTIVE_LOW>;
++		priority = <200>;
++	};
++};
++
++&aes {
++	status = "disabled"; /* Reserved by secure OS */
++};
++
++&flx3 {
++	atmel,flexcom-mode = <ATMEL_FLEXCOM_MODE_USART>;
++	status = "okay";
++
++	usart3: serial@200 {
++		pinctrl-0 = <&fc3_b_pins>;
++		pinctrl-names = "default";
++		status = "okay";
++	};
++};
++
++&gpio {
++	fc3_b_pins: fc3-b-pins {
++		/* RX, TX */
++		pins = "GPIO_52", "GPIO_53";
++		function = "fc3_b";
++	};
++};
++
++&reset {
++	phy0-syscon = <&phy0_ctrl>;
++	phy1-syscon = <&phy1_ctrl>;
++	chip-syscon = <&chip_ctrl>;
++};
++
++&soc {
++	chip_ctrl: syscon@e2010000 {
++		compatible = "microchip,lan966x-chip-syscon", "syscon";
++		reg = <0xe2010010 0x00000014>;
++	};
++
++	phy0_ctrl: syscon@e00a0600 {
++		compatible = "microchip,lan966x-switch-syscon", "syscon";
++		reg = <0xe00a0600 0x00000080>;
++	};
++
++	phy1_ctrl: syscon@e00a0a00 {
++		compatible = "microchip,lan966x-switch-syscon", "syscon";
++		reg = <0xe00a0a00 0x00000080>;
++	};
++};
++
++&uio0 {
++	interrupts = <GIC_SPI 19 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 10 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 11 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI  9 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 80 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 81 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 18 IRQ_TYPE_LEVEL_HIGH>;
++	interrupt-names = "master", "ptp_sync", "ptp_rdy",
++			  "oam_vop", "cu_phy0", "cu_phy1",
++			  "sgpio";
++};
+diff --git a/arch/arm/boot/dts/microchip/lan966x-mesa-pcb8309.dts b/arch/arm/boot/dts/microchip/lan966x-mesa-pcb8309.dts
+new file mode 100644
+index 000000000000..6e5158839719
+--- /dev/null
++++ b/arch/arm/boot/dts/microchip/lan966x-mesa-pcb8309.dts
+@@ -0,0 +1,151 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * lan966x-mesa-pcb8309.dts - Device Tree file for PCB8309
++ */
++/dts-v1/;
++#include "lan966x.dtsi"
++
++/ {
++	model = "Microchip LAN966X";
++	compatible = "microchip,lan966x-sunrise", "microchip,lan966x";
++
++	aliases {
++		i2c102 = &i2c102;
++		i2c103 = &i2c103;
++	};
++
++	gpio-restart {
++		compatible = "gpio-restart";
++		gpios = <&gpio 56 GPIO_ACTIVE_LOW>;
++		priority = <200>;
++	};
++
++	mux: mux-controller {
++		compatible = "gpio-mux";
++		#mux-control-cells = <0>;
++
++		mux-gpios = <&sgpio_out 11 0 GPIO_ACTIVE_HIGH>, /* p11b0 */
++			    <&sgpio_out 11 1 GPIO_ACTIVE_HIGH>; /* p11b1 */
++	};
++
++	i2c-mux {
++		compatible = "i2c-mux";
++		#address-cells = <1>;
++		#size-cells = <0>;
++		mux-controls = <&mux>;
++		i2c-parent = <&i2c4>;
++
++		i2c102: i2c-sfp@1 {
++			reg = <1>;
++		};
++
++		i2c103: i2c-sfp@2 {
++			reg = <2>;
++		};
++	};
++};
++
++&aes {
++	status = "disabled"; /* Reserved by secure OS */
++};
++
++&flx3 {
++	atmel,flexcom-mode = <ATMEL_FLEXCOM_MODE_USART>;
++	status = "okay";
++
++	usart3: serial@200 {
++		pinctrl-0 = <&fc3_b_pins>;
++		pinctrl-names = "default";
++		status = "okay";
++	};
++};
++
++&flx4 {
++	atmel,flexcom-mode = <ATMEL_FLEXCOM_MODE_TWI>;
++	status = "okay";
++
++	i2c4: i2c@600 {
++		pinctrl-0 = <&fc4_b_pins>;
++		pinctrl-names = "default";
++		i2c-analog-filter;
++		i2c-digital-filter;
++		i2c-digital-filter-width-ns = <35>;
++		i2c-sda-hold-time-ns = <1500>;
++		status = "okay";
++	};
++};
++
++&gpio {
++	fc3_b_pins: fc3-b-pins {
++		/* RX, TX */
++		pins = "GPIO_52", "GPIO_53";
++		function = "fc3_b";
++	};
++
++	fc4_b_pins: fcb4-i2c-pins {
++		/* RXD, TXD */
++		pins = "GPIO_57", "GPIO_58";
++		function = "fc4_b";
++	};
++
++	sgpio_a_pins: sgpio-pins {
++		/* SCK, D0, D1, LD */
++		pins = "GPIO_32", "GPIO_33", "GPIO_34", "GPIO_35";
++		function = "sgpio_a";
++	};
++};
++
++&reset {
++	phy0-syscon = <&phy0_ctrl>;
++	phy1-syscon = <&phy1_ctrl>;
++	chip-syscon = <&chip_ctrl>;
++};
++
++&sgpio_in {
++	/delete-property/ interrupts;
++	/delete-property/ interrupt-controller;
++	/delete-property/ #interrupt-cells;
++};
++
++&sgpio {
++	pinctrl-0 = <&sgpio_a_pins>;
++	pinctrl-names = "default";
++	status = "okay";
++	microchip,sgpio-port-ranges = <0 3>, <8 11>;
++	gpio@0 {
++		ngpios = <64>;
++	};
++	gpio@1 {
++		ngpios = <64>;
++	};
++};
++
++&soc {
++	chip_ctrl: syscon@e2010000 {
++		compatible = "microchip,lan966x-chip-syscon", "syscon";
++		reg = <0xe2010010 0x00000014>;
++	};
++
++	phy0_ctrl: syscon@e00a0600 {
++		compatible = "microchip,lan966x-switch-syscon", "syscon";
++		reg = <0xe00a0600 0x00000080>;
++	};
++
++	phy1_ctrl: syscon@e00a0a00 {
++		compatible = "microchip,lan966x-switch-syscon", "syscon";
++		reg = <0xe00a0a00 0x00000080>;
++	};
++};
++
++&uio0 {
++	interrupts = <GIC_SPI 19 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 10 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 11 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI  9 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 80 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 81 IRQ_TYPE_LEVEL_HIGH>,
++		     <GIC_SPI 18 IRQ_TYPE_LEVEL_HIGH>;
++	interrupt-names = "master", "ptp_sync", "ptp_rdy",
++			  "oam_vop", "cu_phy0", "cu_phy1",
++			  "sgpio";
++};
+diff --git a/arch/arm/boot/dts/microchip/lan966x-pcb8281-rgmii.dts b/arch/arm/boot/dts/microchip/lan966x-pcb8281-rgmii.dts
+new file mode 100644
+index 000000000000..4f2d2f65b068
+--- /dev/null
++++ b/arch/arm/boot/dts/microchip/lan966x-pcb8281-rgmii.dts
+@@ -0,0 +1,64 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * lan966x_pcb8281.dts - Device Tree file for PCB8281
++ */
++/dts-v1/;
++
++#include "lan966x-pcb8281.dtsi"
++
++&aes {
++	status = "disabled";
++};
++
++&gpio {
++	miim_a_pins: mdio-pins {
++		/* MDC, MDIO */
++		pins =  "GPIO_28", "GPIO_29";
++		function = "miim_a";
++		drive-strength = <0>;
++	};
++
++	fc3_b_pins: fc3-b-pins {
++		/* RX, TX */
++		pins = "GPIO_52", "GPIO_53";
++		function = "fc3_b";
++	};
++};
++
++&mdio0 {
++	status = "okay";
++	pinctrl-names = "default";
++	pinctrl-0 = <&miim_a_pins>;
++
++	phy3: ethernet-phy@3 {
++		reg = <3>;
++	};
++};
++
++&miim_a_pins {
++	drive-strength = <0>;
++};
++
++&port3 {
++	status = "okay";
++	phy-handle = <&phy3>;
++	phy-mode = "rgmii-id";
++	phys = <&serdes 3 RGMII(1)>;
++};
++
++&flx3 {
++	atmel,flexcom-mode = <ATMEL_FLEXCOM_MODE_USART>;
++	status = "okay";
++
++	usart3: serial@200 {
++		compatible = "atmel,at91sam9260-usart";
++		reg = <0x200 0x200>;
++		interrupts = <GIC_SPI 51 IRQ_TYPE_LEVEL_HIGH>;
++		clocks = <&nic_clk>;
++		clock-names = "usart";
++		pinctrl-0 = <&fc3_b_pins>;
++		pinctrl-names = "default";
++		atmel,fifo-size = <32>;
++		status = "okay";
++	};
++};
+diff --git a/arch/arm/boot/dts/microchip/lan966x-pcb8281.dts b/arch/arm/boot/dts/microchip/lan966x-pcb8281.dts
+new file mode 100644
+index 000000000000..0849a431b486
+--- /dev/null
++++ b/arch/arm/boot/dts/microchip/lan966x-pcb8281.dts
+@@ -0,0 +1,7 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * lan966x_pcb8281.dts - Device Tree file for PCB8281
++ */
++/dts-v1/;
++
++#include "lan966x-pcb8281.dtsi"
+diff --git a/arch/arm/boot/dts/microchip/lan966x-pcb8281.dtsi b/arch/arm/boot/dts/microchip/lan966x-pcb8281.dtsi
+new file mode 100644
+index 000000000000..d6d9274b8335
+--- /dev/null
++++ b/arch/arm/boot/dts/microchip/lan966x-pcb8281.dtsi
+@@ -0,0 +1,53 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * lan966x_pcb8281.dts - Device Tree file for PCB8281
++ */
++/dts-v1/;
++
++#include "lan966x.dtsi"
++#include "dt-bindings/phy/phy-lan966x-serdes.h"
++
++/ {
++	model = "Microchip EVB - LAN9662";
++	compatible = "microchip,lan9662-pcb8281", "microchip,lan9662", "microchip,lan966";
++
++	gpio-restart {
++		compatible = "gpio-restart";
++		gpios = <&gpio 56 GPIO_ACTIVE_LOW>;
++		priority = <200>;
++	};
++};
++
++&mdio1 {
++	status = "okay";
++};
++
++&phy0 {
++	status = "okay";
++};
++
++&phy1 {
++	status = "okay";
++};
++
++&port0 {
++	phy-handle = <&phy0>;
++	phy-mode = "gmii";
++	phys = <&serdes 0 CU(0)>;
++	status = "okay";
++};
++
++&port1 {
++	phy-handle = <&phy1>;
++	phy-mode = "gmii";
++	phys = <&serdes 1 CU(1)>;
++	status = "okay";
++};
++
++&serdes {
++	status = "okay";
++};
++
++&switch {
++	status = "okay";
++};
+diff --git a/arch/arm/boot/dts/microchip/lan966x-pcb8290.dts b/arch/arm/boot/dts/microchip/lan966x-pcb8290.dts
+index 3b7577e48b46..97923dbeb241 100644
+--- a/arch/arm/boot/dts/microchip/lan966x-pcb8290.dts
++++ b/arch/arm/boot/dts/microchip/lan966x-pcb8290.dts
+@@ -8,6 +8,7 @@
+  */
+ /dts-v1/;
+ #include "lan966x.dtsi"
++#include "lan966x-port-delay-pcb8290.dtsi"
+ #include "dt-bindings/phy/phy-lan966x-serdes.h"
+ 
+ / {
+@@ -19,6 +20,12 @@ gpio-restart {
+ 		gpios = <&gpio 56 GPIO_ACTIVE_LOW>;
+ 		priority = <200>;
+ 	};
++
++	phy_external_reset: phy_external_reset {
++		compatible = "microchip,lan966x-phy-reset-external";
++		#reset-cells = <1>;
++		phy-external-reset-gpios = <&gpio 53 GPIO_ACTIVE_LOW>;
++	};
+ };
+ 
+ &aes {
+@@ -26,6 +33,19 @@ &aes {
+ };
+ 
+ &gpio {
++	emmc_sd_pins: emmc-sd-pins {
++		/* eMMC_SD - CMD, CLK, D0, D1, D2, D3, RSTN */
++		pins = "GPIO_67", "GPIO_68", "GPIO_69", "GPIO_70",
++			"GPIO_71", "GPIO_72", "GPIO_77";
++		function = "emmc_sd";
++	};
++
++	emmc_pins: emmc-pins {
++		/* eMMC - D4, D5, D6, D7 */
++		pins = "GPIO_73", "GPIO_74", "GPIO_75", "GPIO_76";
++		function = "emmc";
++	};
++
+ 	miim_a_pins: mdio-pins {
+ 		/* MDC, MDIO */
+ 		pins = "GPIO_28", "GPIO_29";
+@@ -52,10 +72,14 @@ udc_pins: ucd-pins {
+ };
+ 
+ &mdio0 {
++	compatible = "microchip,lan9668-miim";
+ 	pinctrl-0 = <&miim_a_pins>;
+ 	pinctrl-names = "default";
+ 	status = "okay";
+ 
++	resets = <&phy_external_reset 0>;
++	reset-names = "phy";
++
+ 	ext_phy0: ethernet-phy@7 {
+ 		reg = <7>;
+ 		interrupts = <24 IRQ_TYPE_LEVEL_LOW>;
+@@ -177,6 +201,33 @@ &port7 {
+ 	status = "okay";
+ };
+ 
++&qspi0 {
++	status = "okay";
++
++	spi-flash@0 {
++		compatible = "jedec,spi-nor";
++		reg = <0>;
++		spi-max-frequency = <20000000>;
++		#address-cells = <1>;
++		#size-cells = <1>;
++		spi-tx-bus-width = <4>;
++		spi-rx-bus-width = <4>;
++		m25p,fast-read;
++	};
++};
++
++&sdmmc0 {
++	bus-width = <8>;
++	cap-mmc-highspeed;
++	cap-mmc-hw-reset;
++	non-removable;
++	pinctrl-0 = <&emmc_sd_pins>, <&emmc_pins>;
++	pinctrl-names = "default";
++	no-1-8-v;
++	tx-phase = <0>; /* 180 degrees phase shift */
++	status = "okay";
++};
++
+ &serdes {
+ 	status = "okay";
+ };
+diff --git a/arch/arm/boot/dts/microchip/lan966x-pcb8291.dts b/arch/arm/boot/dts/microchip/lan966x-pcb8291.dts
+index 3a3d76af8612..108db2916a19 100644
+--- a/arch/arm/boot/dts/microchip/lan966x-pcb8291.dts
++++ b/arch/arm/boot/dts/microchip/lan966x-pcb8291.dts
+@@ -4,6 +4,7 @@
+  */
+ /dts-v1/;
+ #include "lan966x.dtsi"
++#include "lan966x-port-delay-pcb8291.dtsi"
+ #include "dt-bindings/phy/phy-lan966x-serdes.h"
+ 
+ / {
+@@ -50,6 +51,20 @@ led-s1-green {
+ 			gpios = <&sgpio_out 3 1 GPIO_ACTIVE_LOW>;
+ 			default-state = "off";
+ 		};
++
++		led-p1-green {
++			label = "cu0:green";
++			gpios = <&sgpio_out 0 0 GPIO_ACTIVE_LOW>;
++			default-state = "off";
++			linux,default-trigger = "e200413c.mdio-mii:01:link";
++		};
++
++		led-p2-green {
++			label = "cu1:green";
++			gpios = <&sgpio_out 1 0 GPIO_ACTIVE_LOW>;
++			default-state = "off";
++			linux,default-trigger = "e200413c.mdio-mii:02:link";
++		};
+ 	};
+ };
+ 
+@@ -58,6 +73,19 @@ &aes {
+ };
+ 
+ &gpio {
++	emmc_sd_pins: emmc-sd-pins {
++		/* eMMC_SD - CMD, CLK, D0, D1, D2, D3, RSTN */
++		pins = "GPIO_67", "GPIO_68", "GPIO_69", "GPIO_70",
++			"GPIO_71", "GPIO_72", "GPIO_77";
++		function = "emmc_sd";
++	};
++
++	emmc_pins: emmc-pins {
++		/* eMMC - D4, D5, D6, D7 */
++		pins = "GPIO_73", "GPIO_74", "GPIO_75", "GPIO_76";
++		function = "emmc";
++	};
++
+ 	fc3_b_pins: fc3-b-pins {
+ 		/* RX, TX */
+ 		pins = "GPIO_52", "GPIO_53";
+@@ -75,6 +103,11 @@ sgpio_a_pins: sgpio-a-pins {
+ 		pins = "GPIO_32", "GPIO_33", "GPIO_34", "GPIO_35";
+ 		function = "sgpio_a";
+ 	};
++
++	usb_host_a_pins: usb_host_a_pins {
++		pins = "GPIO_65", "GPIO_66";
++		function = "usb_host_a";
++	};
+ };
+ 
+ &can0 {
+@@ -120,6 +153,33 @@ &port1 {
+ 	status = "okay";
+ };
+ 
++&qspi0 {
++	status = "okay";
++
++	spi-flash@0 {
++		compatible = "jedec,spi-nor";
++		reg = <0>;
++		spi-max-frequency = <20000000>;
++		#address-cells = <1>;
++		#size-cells = <1>;
++		spi-tx-bus-width = <4>;
++		spi-rx-bus-width = <4>;
++		m25p,fast-read;
++	};
++};
++
++&sdmmc0 {
++	bus-width = <8>;
++	cap-mmc-highspeed;
++	cap-mmc-hw-reset;
++	non-removable;
++	pinctrl-0 = <&emmc_sd_pins>, <&emmc_pins>;
++	pinctrl-names = "default";
++	no-1-8-v;
++	tx-phase = <0>; /* 180 degrees phase shift */
++	status = "okay";
++};
++
+ &serdes {
+ 	status = "okay";
+ };
+@@ -142,6 +202,13 @@ &switch {
+ 	status = "okay";
+ };
+ 
++&usb {
++	dr_mode = "host";
++	pinctrl-0 = <&usb_host_a_pins>;
++	pinctrl-names = "default";
++	status = "okay";
++};
++
+ &watchdog {
+ 	status = "okay";
+ };
+diff --git a/arch/arm/boot/dts/microchip/lan966x-pcb8309.dts b/arch/arm/boot/dts/microchip/lan966x-pcb8309.dts
+index 0cb505f79ba1..7074a7744c80 100644
+--- a/arch/arm/boot/dts/microchip/lan966x-pcb8309.dts
++++ b/arch/arm/boot/dts/microchip/lan966x-pcb8309.dts
+@@ -4,6 +4,7 @@
+  */
+ /dts-v1/;
+ #include "lan966x.dtsi"
++#include "lan966x-port-delay-pcb8309.dtsi"
+ #include "dt-bindings/phy/phy-lan966x-serdes.h"
+ 
+ / {
+@@ -68,6 +69,20 @@ led-s1-red {
+ 			gpios = <&sgpio_out 3 1 GPIO_ACTIVE_LOW>;
+ 			default-state = "off";
+ 		};
++
++		led-p1-green {
++			label = "cu0:green";
++			gpios = <&sgpio_out 0 0 GPIO_ACTIVE_LOW>;
++			default-state = "off";
++			linux,default-trigger = "e200413c.mdio-mii:01:link";
++		};
++
++		led-p2-green {
++			label = "cu1:green";
++			gpios = <&sgpio_out 1 0 GPIO_ACTIVE_LOW>;
++			default-state = "off";
++			linux,default-trigger = "e200413c.mdio-mii:02:link";
++		};
+ 	};
+ 
+ 	mux: mux-controller {
+@@ -122,7 +137,10 @@ i2c4: i2c@600 {
+ 		interrupts = <GIC_SPI 52 IRQ_TYPE_LEVEL_HIGH>;
+ 		clocks = <&nic_clk>;
+ 		pinctrl-0 = <&fc4_b_pins>;
+-		pinctrl-names = "default";
++		pinctrl-1 = <&fc4_b_pins_gpio>;
++		pinctrl-names = "default", "gpio";
++		sda-gpios = <&gpio 58 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
++		scl-gpios = <&gpio 57 (GPIO_ACTIVE_HIGH | GPIO_OPEN_DRAIN)>;
+ 		i2c-analog-filter;
+ 		i2c-digital-filter;
+ 		i2c-digital-filter-width-ns = <35>;
+@@ -132,6 +150,19 @@ i2c4: i2c@600 {
+ };
+ 
+ &gpio {
++	emmc_sd_pins: emmc-sd-pins {
++		/* eMMC_SD - CMD, CLK, D0, D1, D2, D3, RSTN */
++		pins = "GPIO_67", "GPIO_68", "GPIO_69", "GPIO_70",
++			"GPIO_71", "GPIO_72", "GPIO_77";
++		function = "emmc_sd";
++	};
++
++	emmc_pins: emmc-pins {
++		/* eMMC - D4, D5, D6, D7 */
++		pins = "GPIO_73", "GPIO_74", "GPIO_75", "GPIO_76";
++		function = "emmc";
++	};
++
+ 	fc3_b_pins: fc3-b-pins {
+ 		/* RXD, TXD */
+ 		pins = "GPIO_52", "GPIO_53";
+@@ -144,6 +175,12 @@ fc4_b_pins: fc4-b-pins {
+ 		function = "fc4_b";
+ 	};
+ 
++	fc4_b_pins_gpio: fcb4-i2c-pins-gpio {
++		/* RXD, TXD */
++		pins = "GPIO_57", "GPIO_58";
++		function = "gpio";
++	};
++
+ 	pps_out_pins: pps-out-pins {
+ 		/* 1pps output */
+ 		pins = "GPIO_38";
+@@ -161,6 +198,11 @@ sgpio_a_pins: sgpio-a-pins {
+ 		pins = "GPIO_32", "GPIO_33", "GPIO_34", "GPIO_35";
+ 		function = "sgpio_a";
+ 	};
++
++	usb_host_a_pins: usb_host_a_pins {
++		pins = "GPIO_65", "GPIO_66";
++		function = "usb_host_a";
++	};
+ };
+ 
+ &mdio1 {
+@@ -205,6 +247,33 @@ &port3 {
+ 	status = "okay";
+ };
+ 
++&qspi0 {
++	status = "okay";
++
++	spi-flash@0 {
++		compatible = "jedec,spi-nor";
++		reg = <0>;
++		spi-max-frequency = <20000000>;
++		#address-cells = <1>;
++		#size-cells = <1>;
++		spi-tx-bus-width = <4>;
++		spi-rx-bus-width = <4>;
++		m25p,fast-read;
++	};
++};
++
++&sdmmc0 {
++	bus-width = <8>;
++	cap-mmc-highspeed;
++	cap-mmc-hw-reset;
++	non-removable;
++	pinctrl-0 = <&emmc_sd_pins>, <&emmc_pins>;
++	pinctrl-names = "default";
++	no-1-8-v;
++	tx-phase = <0>; /* 180 degrees phase shift */
++	status = "okay";
++};
++
+ &serdes {
+ 	status = "okay";
+ };
+@@ -223,6 +292,13 @@ gpio@1 {
+ 	};
+ };
+ 
++&usb {
++	dr_mode = "host";
++	pinctrl-0 = <&usb_host_a_pins>;
++	pinctrl-names = "default";
++	status = "okay";
++};
++
+ &switch {
+ 	pinctrl-0 = <&pps_out_pins>, <&ptp_ext_pins>;
+ 	pinctrl-names = "default";
+diff --git a/arch/arm/boot/dts/microchip/lan966x-pcb8385.dts b/arch/arm/boot/dts/microchip/lan966x-pcb8385.dts
+new file mode 100644
+index 000000000000..71c21846abcc
+--- /dev/null
++++ b/arch/arm/boot/dts/microchip/lan966x-pcb8385.dts
+@@ -0,0 +1,270 @@
++// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
++/*
++ * lan966x-pcb8385.dts - Device Tree file for LAN966X-PCB8385 board
++ *
++ * Copyright (C) 2022 Microchip Technology Inc. and its subsidiaries
++ *
++ * Author: Horatiu Vultur <horatiu.vultur@microchip.com>
++ * Author: Jerry Ray <jerry.ray@microchip.com>
++ */
++/dts-v1/;
++
++#include "lan966x.dtsi"
++#include "dt-bindings/phy/phy-lan966x-serdes.h"
++
++/ {
++	model = "Microchip EDS - LAN9668";
++	compatible = "microchip,lan9668-pcb8385", "microchip,lan9668", "microchip,lan966";
++
++	chosen {
++		stdout-path = "serial0:115200n8";
++	};
++
++	aliases {
++		serial0 = &usart3;
++		serial1 = &usart2;
++	};
++
++	leds {
++		compatible = "gpio-leds";
++
++		led-p1-green {
++			label = "cu0:green";
++			gpios = <&sgpio_out 2 0 GPIO_ACTIVE_LOW>;
++			default-state = "off";
++			linux,default-trigger = "e200413c.mdio-mii:01:link";
++		};
++
++		led-p1-yellow {
++			label = "cu0:yellow";
++			gpios = <&sgpio_out 2 1 GPIO_ACTIVE_LOW>;
++			default-state = "off";
++		};
++
++		led-p2-green {
++			label = "cu1:green";
++			gpios = <&sgpio_out 3 0 GPIO_ACTIVE_LOW>;
++			default-state = "off";
++			linux,default-trigger = "e200413c.mdio-mii:02:link";
++		};
++
++		led-p2-yellow {
++			label = "cu1:yellow";
++			gpios = <&sgpio_out 3 1 GPIO_ACTIVE_LOW>;
++			default-state = "off";
++		};
++	};
++
++	gpio-restart {
++		compatible = "gpio-restart";
++		gpios = <&gpio 59 GPIO_ACTIVE_LOW>;
++		open-source;
++		priority = <200>;
++	};
++};
++
++&aes {
++	status = "disabled"; /* Reserved by secure OS */
++};
++
++&gpio {
++	emmc_sd_pins: emmc-sd-pins {
++		/* eMMC_SD - CMD, CLK, D0, D1, D2, D3, RSTN */
++		pins = "GPIO_67", "GPIO_68", "GPIO_69", "GPIO_70",
++			"GPIO_71", "GPIO_72", "GPIO_77";
++		function = "emmc_sd";
++	};
++
++	emmc_pins: emmc-pins {
++		/* eMMC - D4, D5, D6, D7 */
++		pins = "GPIO_73", "GPIO_74", "GPIO_75", "GPIO_76";
++		function = "emmc";
++	};
++
++	fc0_b_pins: fc0-b-pins {
++		/* SCL, SDA */
++		pins = "GPIO_25", "GPIO_26";
++		function = "fc0_b";
++	};
++
++	fc1_c_pins: fc1-c-pins {
++		/* SCL, SDA */
++		pins = "GPIO_47", "GPIO_48";
++		function = "fc1_c";
++	};
++
++	fc2_b_pins: fc2-b-pins {
++		/* RX, TX */
++		pins = "GPIO_44", "GPIO_45";
++		function = "fc2_b";
++	};
++
++	fc3_b_pins: fc3-b-pins {
++		/* RX, TX */
++		pins = "GPIO_52", "GPIO_53";
++		function = "fc3_b";
++	};
++
++	fc4_b_pins: fc4-b-pins {
++		/* SCK, MISO, MOSI */
++		pins = "GPIO_56", "GPIO_57", "GPIO_58";
++		function = "fc4_b";
++	};
++
++	fc_shrd13_pins: fc-shrd13-pins {
++		pins = "GPIO_62";
++		function = "fc_shrd13";
++	};
++
++	sgpio_a_pins: sgpio-a-pins {
++		/* SCK, D0, D1, LD */
++		pins = "GPIO_32", "GPIO_33", "GPIO_34", "GPIO_35";
++		function = "sgpio_a";
++	};
++
++	usb_host_a_pins: usb_host_a_pins {
++		pins = "GPIO_65", "GPIO_66";
++		function = "usb_host_a";
++	};
++};
++
++&flx0 {
++	atmel,flexcom-mode = <ATMEL_FLEXCOM_MODE_TWI>;
++	status = "okay";
++
++	i2c0: i2c@600 {
++		pinctrl-0 = <&fc0_b_pins>;
++		pinctrl-names = "default";
++		dmas = <0>, <0>;
++		i2c-analog-filter;
++		i2c-digital-filter;
++		i2c-digital-filter-width-ns = <35>;
++		i2c-sda-hold-time-ns = <1500>;
++		status = "okay";
++	};
++};
++
++&flx1 {
++	atmel,flexcom-mode = <ATMEL_FLEXCOM_MODE_TWI>;
++	status = "okay";
++
++	i2c1: i2c@600 {
++		pinctrl-0 = <&fc1_c_pins>;
++		pinctrl-names = "default";
++		dmas = <0>, <0>;
++		i2c-analog-filter;
++		i2c-digital-filter;
++		i2c-digital-filter-width-ns = <35>;
++		i2c-sda-hold-time-ns = <1500>;
++		status = "okay";
++	};
++};
++
++&flx2 {
++	atmel,flexcom-mode = <ATMEL_FLEXCOM_MODE_USART>;
++	status = "okay";
++
++	usart2: serial@200 {
++		pinctrl-0 = <&fc2_b_pins>;
++		pinctrl-names = "default";
++		status = "okay";
++	};
++};
++
++&flx3 {
++	atmel,flexcom-mode = <ATMEL_FLEXCOM_MODE_USART>;
++	status = "okay";
++
++	usart3: serial@200 {
++		pinctrl-0 = <&fc3_b_pins>;
++		pinctrl-names = "default";
++		status = "okay";
++	};
++};
++
++&flx4 {
++	atmel,flexcom-mode = <ATMEL_FLEXCOM_MODE_SPI>;
++	status = "okay";
++
++	spi4: spi@400 {
++		clock-names = "spi_clk";
++		pinctrl-0 = <&fc4_b_pins>, <&fc_shrd13_pins>;
++		pinctrl-names = "default";
++		cs-gpios = <&gpio 62 GPIO_ACTIVE_LOW>;
++		dmas = <0>, <0>;
++		status = "okay";
++	};
++};
++
++&i2c0 {
++	eeprom@54 {
++		compatible = "atmel,24c01";
++		reg = <0x54>;
++		status = "okay";
++	};
++
++	eeprom@55 {
++		compatible = "atmel,24c01";
++		reg = <0x55>;
++		status = "okay";
++	};
++
++	/* UCS2113 at 0x57 */
++};
++
++&qspi0 {
++	status = "okay";
++
++	spi-flash@0 {
++		compatible = "jedec,spi-nor";
++		reg = <0>;
++		spi-max-frequency = <20000000>;
++		#address-cells = <1>;
++		#size-cells = <1>;
++		spi-tx-bus-width = <4>;
++		spi-rx-bus-width = <4>;
++		m25p,fast-read;
++	};
++};
++
++&sdmmc0 {
++	bus-width = <8>;
++	cap-mmc-highspeed;
++	cap-mmc-hw-reset;
++	non-removable;
++	pinctrl-0 = <&emmc_sd_pins>, <&emmc_pins>;
++	pinctrl-names = "default";
++	no-1-8-v;
++	tx-phase = <0>; /* 180 degrees phase shift */
++	status = "okay";
++};
++
++&sgpio {
++	pinctrl-0 = <&sgpio_a_pins>;
++	pinctrl-names = "default";
++	microchip,sgpio-port-ranges = <0 3>;
++	status = "okay";
++
++	gpio@0 {
++		ngpios = <64>;
++	};
++	gpio@1 {
++		ngpios = <64>;
++	};
++};
++
++&spi4 {
++	spidev: spidev@0 {
++		compatible = "linux,spidev";
++		reg = <0>;
++		spi-max-frequency = <2000000>;
++		status = "okay";
++	};
++};
++
++&usb {
++	dr_mode = "host";
++	pinctrl-0 = <&usb_host_a_pins>;
++	pinctrl-names = "default";
++	status = "okay";
++};
+diff --git a/arch/arm/boot/dts/microchip/lan966x-port-delay-pcb8290.dtsi b/arch/arm/boot/dts/microchip/lan966x-port-delay-pcb8290.dtsi
+new file mode 100644
+index 000000000000..9dae940b1d9a
+--- /dev/null
++++ b/arch/arm/boot/dts/microchip/lan966x-port-delay-pcb8290.dtsi
+@@ -0,0 +1,207 @@
++&port0 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++
++	delay0 {
++		reg = <0>;
++		speed = <1000>;
++		rx_delay = <0x2be00>;
++		tx_delay = <0x2be00>;
++	};
++
++	delay1 {
++		reg = <0>;
++		speed = <100>;
++		rx_delay = <0xb3e00>;
++		tx_delay = <0xb3e00>;
++	};
++
++	delay2 {
++		reg = <0>;
++		speed = <10>;
++		rx_delay = <0x6bcf00>;
++		tx_delay = <0x6bcf00>;
++	};
++};
++
++&port1 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++
++	delay0 {
++		reg = <0>;
++		speed = <1000>;
++		rx_delay = <0x2be00>;
++		tx_delay = <0x2be00>;
++	};
++
++	delay1 {
++		reg = <0>;
++		speed = <100>;
++		rx_delay = <0xb3e00>;
++		tx_delay = <0xb3e00>;
++	};
++
++	delay2 {
++		reg = <0>;
++		speed = <10>;
++		rx_delay = <0x6bcf00>;
++		tx_delay = <0x6bcf00>;
++	};
++};
++
++&port2 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++
++	delay0 {
++		reg = <0>;
++		speed = <1000>;
++		rx_delay = <0x2be00>;
++		tx_delay = <0x2be00>;
++	};
++
++	delay1 {
++		reg = <0>;
++		speed = <100>;
++		rx_delay = <0xb3e00>;
++		tx_delay = <0xb3e00>;
++	};
++
++	delay2 {
++		reg = <0>;
++		speed = <10>;
++		rx_delay = <0x6bcf00>;
++		tx_delay = <0x6bcf00>;
++	};
++};
++
++&port3 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++
++	delay0 {
++		reg = <0>;
++		speed = <1000>;
++		rx_delay = <0x2be00>;
++		tx_delay = <0x2be00>;
++	};
++
++	delay1 {
++		reg = <0>;
++		speed = <100>;
++		rx_delay = <0xb3e00>;
++		tx_delay = <0xb3e00>;
++	};
++
++	delay2 {
++		reg = <0>;
++		speed = <10>;
++		rx_delay = <0x6bcf00>;
++		tx_delay = <0x6bcf00>;
++	};
++};
++
++&port4 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++
++	delay0 {
++		reg = <0>;
++		speed = <1000>;
++		rx_delay = <0x2be00>;
++		tx_delay = <0x2be00>;
++	};
++
++	delay1 {
++		reg = <0>;
++		speed = <100>;
++		rx_delay = <0xb3e00>;
++		tx_delay = <0xb3e00>;
++	};
++
++	delay2 {
++		reg = <0>;
++		speed = <10>;
++		rx_delay = <0x6bcf00>;
++		tx_delay = <0x6bcf00>;
++	};
++};
++
++&port5 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++
++	delay0 {
++		reg = <0>;
++		speed = <1000>;
++		rx_delay = <0x2be00>;
++		tx_delay = <0x2be00>;
++	};
++
++	delay1 {
++		reg = <0>;
++		speed = <100>;
++		rx_delay = <0xb3e00>;
++		tx_delay = <0xb3e00>;
++	};
++
++	delay2 {
++		reg = <0>;
++		speed = <10>;
++		rx_delay = <0x6bcf00>;
++		tx_delay = <0x6bcf00>;
++	};
++};
++
++&port6 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++
++	delay0 {
++		reg = <0>;
++		speed = <1000>;
++		rx_delay = <0x2be00>;
++		tx_delay = <0x2be00>;
++	};
++
++	delay1 {
++		reg = <0>;
++		speed = <100>;
++		rx_delay = <0xb3e00>;
++		tx_delay = <0xb3e00>;
++	};
++
++	delay2 {
++		reg = <0>;
++		speed = <10>;
++		rx_delay = <0x6bcf00>;
++		tx_delay = <0x6bcf00>;
++	};
++};
++
++&port7 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++
++	delay0 {
++		reg = <0>;
++		speed = <1000>;
++		rx_delay = <0x2be00>;
++		tx_delay = <0x2be00>;
++	};
++
++	delay1 {
++		reg = <0>;
++		speed = <100>;
++		rx_delay = <0xb3e00>;
++		tx_delay = <0xb3e00>;
++	};
++
++	delay2 {
++		reg = <0>;
++		speed = <10>;
++		rx_delay = <0x6bcf00>;
++		tx_delay = <0x6bcf00>;
++	};
++};
+diff --git a/arch/arm/boot/dts/microchip/lan966x-port-delay-pcb8291.dtsi b/arch/arm/boot/dts/microchip/lan966x-port-delay-pcb8291.dtsi
+new file mode 100644
+index 000000000000..7776ce30c758
+--- /dev/null
++++ b/arch/arm/boot/dts/microchip/lan966x-port-delay-pcb8291.dtsi
+@@ -0,0 +1,51 @@
++&port0 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++
++	delay0 {
++		reg = <0>;
++		speed = <1000>;
++		rx_delay = <0x12700>;
++		tx_delay = <0x12700>;
++	};
++
++	delay1 {
++		reg = <0>;
++		speed = <100>;
++		rx_delay = <0x3e100>;
++		tx_delay = <0x3e100>;
++	};
++
++	delay2 {
++		reg = <0>;
++		speed = <10>;
++		rx_delay = <0x2c3300>;
++		tx_delay = <0x2c3300>;
++	};
++};
++
++&port1 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++
++	delay0 {
++		reg = <0>;
++		speed = <1000>;
++		rx_delay = <0x12700>;
++		tx_delay = <0x12700>;
++	};
++
++	delay1 {
++		reg = <0>;
++		speed = <100>;
++		rx_delay = <0x3e100>;
++		tx_delay = <0x3e100>;
++	};
++
++	delay2 {
++		reg = <0>;
++		speed = <10>;
++		rx_delay = <0x2c3300>;
++		tx_delay = <0x2c3300>;
++	};
++};
+diff --git a/arch/arm/boot/dts/microchip/lan966x-port-delay-pcb8309.dtsi b/arch/arm/boot/dts/microchip/lan966x-port-delay-pcb8309.dtsi
+new file mode 100644
+index 000000000000..299db4b45884
+--- /dev/null
++++ b/arch/arm/boot/dts/microchip/lan966x-port-delay-pcb8309.dtsi
+@@ -0,0 +1,103 @@
++&port0 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++
++	delay0 {
++		reg = <0>;
++		speed = <1000>;
++		rx_delay = <0x12700>;
++		tx_delay = <0x12700>;
++	};
++
++	delay1 {
++		reg = <0>;
++		speed = <100>;
++		rx_delay = <0x3e100>;
++		tx_delay = <0x3e100>;
++	};
++
++	delay2 {
++		reg = <0>;
++		speed = <10>;
++		rx_delay = <0x2c3300>;
++		tx_delay = <0x2c3300>;
++	};
++};
++
++&port1 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++
++	delay0 {
++		reg = <0>;
++		speed = <1000>;
++		rx_delay = <0x12700>;
++		tx_delay = <0x12700>;
++	};
++
++	delay1 {
++		reg = <0>;
++		speed = <100>;
++		rx_delay = <0x3e100>;
++		tx_delay = <0x3e100>;
++	};
++
++	delay2 {
++		reg = <0>;
++		speed = <10>;
++		rx_delay = <0x2c3300>;
++		tx_delay = <0x2c3300>;
++	};
++};
++
++&port2 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++
++	delay0 {
++		reg = <0>;
++		speed = <1000>;
++		rx_delay = <0x25000>;
++		tx_delay = <0x25000>;
++	};
++
++	delay1 {
++		reg = <0>;
++		speed = <100>;
++		rx_delay = <0x8f050>;
++		tx_delay = <0x8f050>;
++	};
++
++	delay2 {
++		reg = <0>;
++		speed = <10>;
++		rx_delay = <0x4b8000>;
++		tx_delay = <0x4b8000>;
++	};
++};
++
++&port3 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++
++	delay0 {
++		reg = <0>;
++		speed = <1000>;
++		rx_delay = <0x25000>;
++		tx_delay = <0x25000>;
++	};
++
++	delay1 {
++		reg = <0>;
++		speed = <100>;
++		rx_delay = <0x8f050>;
++		tx_delay = <0x8f050>;
++	};
++
++	delay2 {
++		reg = <0>;
++		speed = <10>;
++		rx_delay = <0x4b8000>;
++		tx_delay = <0x4b8000>;
++	};
++};
+diff --git a/arch/arm/boot/dts/microchip/lan966x.dtsi b/arch/arm/boot/dts/microchip/lan966x.dtsi
+index 05b73f7cf0c7..fee2e692db74 100644
+--- a/arch/arm/boot/dts/microchip/lan966x.dtsi
++++ b/arch/arm/boot/dts/microchip/lan966x.dtsi
+@@ -34,6 +34,11 @@ cpu@0 {
+ 		};
+ 	};
+ 
++	psci {
++		compatible = "arm,psci-1.0";
++		method = "smc";
++	};
++
+ 	clocks {
+ 		sys_clk: sys_clk {
+ 			compatible = "fixed-clock";
+@@ -60,6 +65,18 @@ nic_clk: nic_clk {
+ 		};
+ 	};
+ 
++	uio0: mscc_switch@e0000000 {
++		compatible = "microchip,uio_lan966x_irqmux";
++		reg = <0xe0000000 0x4000000>;
++		status = "okay";
++	};
++
++	uio1: mscc_sram@100000 {
++		compatible = "microchip,uio_lan966x_irqmux";
++		reg = <0x00100000 0x20000>;
++		status = "okay";
++	};
++
+ 	clks: clock-controller@e00c00a8 {
+ 		compatible = "microchip,lan966x-gck";
+ 		#clock-cells = <1>;
+@@ -78,7 +95,7 @@ timer {
+ 		clock-frequency = <37500000>;
+ 	};
+ 
+-	soc {
++	soc: soc {
+ 		compatible = "simple-bus";
+ 		#address-cells = <1>;
+ 		#size-cells = <1>;
+@@ -95,6 +112,26 @@ udc: usb@200000 {
+ 			status = "disabled";
+ 		};
+ 
++		usb: usb@300000 {
++			compatible = "microchip,lan966x-dwc3";
++			clocks = <&clks GCK_GATE_UHPHS>;
++			#address-cells = <1>;
++			#size-cells = <1>;
++			ranges;
++			status = "disabled";
++
++			usb_dwc3: usb_dwc3@300000 {
++				compatible = "snps,dwc3";
++				reg = <0x300000 0x80000>;
++				interrupts = <GIC_SPI 82 IRQ_TYPE_LEVEL_HIGH>;
++				phy_type = "utmi";
++				clocks = <&clks GCK_ID_USB_REFCLK>;
++				clock-names = "ref";
++				assigned-clocks = <&clks GCK_ID_USB_REFCLK>;
++				assigned-clock-rates = <100000000>;
++			};
++		};
++
+ 		switch: switch@e0000000 {
+ 			compatible = "microchip,lan966x-switch";
+ 			reg = <0xe0000000 0x0100000>,
+@@ -474,6 +511,21 @@ cpu_ctrl: syscon@e00c0000 {
+ 			reg = <0xe00c0000 0x350>;
+ 		};
+ 
++		qspi0: spi@e0804000 {
++			compatible = "microchip,lan966x-qspi";
++			reg = <0xe0804000 0x00000100>,
++			      <0x20000000 0x08000000>;
++			reg-names = "qspi_base", "qspi_mmap";
++			interrupts = <GIC_SPI 45 IRQ_TYPE_LEVEL_HIGH>;
++			clocks = <&nic_clk>, <&clks GCK_ID_QSPI0>;
++			clock-names = "pclk", "gclk";
++			assigned-clocks = <&clks GCK_ID_QSPI0>;
++			assigned-clock-rates = <100000000>;
++			#address-cells = <1>;
++			#size-cells = <0>;
++			status = "disabled";
++		};
++
+ 		can0: can@e081c000 {
+ 			compatible = "bosch,m_can";
+ 			reg = <0xe081c000 0xfc>, <0x00100000 0x4000>;
+@@ -504,6 +556,17 @@ can1: can@e0820000 {
+ 			status = "disabled";
+ 		};
+ 
++		sdmmc0: sdio-host@e0830000 {
++			compatible = "microchip,lan966x-sdhci";
++			reg = <0xe0830000 0x00000300>;
++			interrupts = <GIC_SPI 66 IRQ_TYPE_LEVEL_HIGH>;
++			clocks = <&clks GCK_ID_SDMMC0>, <&clks GCK_ID_SDMMC0>;
++			clock-names = "hclock", "multclk";
++			assigned-clocks = <&clks GCK_ID_SDMMC0>;
++			assigned-clock-rates = <45000000>;
++			status = "disabled";
++		};
++
+ 		reset: reset-controller@e200400c {
+ 			compatible = "microchip,lan966x-switch-reset";
+ 			reg = <0xe200400c 0x4>;
+-- 
+2.43.0
+
