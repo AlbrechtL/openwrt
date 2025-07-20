@@ -1,0 +1,131 @@
+From 7634df03a73f2dff37f3d754e2b4eb92617dde4c Mon Sep 17 00:00:00 2001
+From: Horatiu Vultur <horatiu.vultur@microchip.com>
+Date: Wed, 16 Jul 2025 11:04:20 +0200
+Subject: [PATCH 1/3] reset: lan966x: Add support for the external PHY reset
+
+Add a driver to release the reset of the external PHYs on lan966x. To
+release the reset of the PHYs is required to toggle twice the GPIO pin.
+
+Signed-off-by: Horatiu Vultur <horatiu.vultur@microchip.com>
+---
+ drivers/reset/Kconfig                         |  8 ++
+ drivers/reset/Makefile                        |  1 +
+ .../reset-microchip-lan966x-phy-external.c    | 75 +++++++++++++++++++
+ 3 files changed, 84 insertions(+)
+ create mode 100644 drivers/reset/reset-microchip-lan966x-phy-external.c
+
+diff --git a/drivers/reset/Kconfig b/drivers/reset/Kconfig
+index 5484a65f66b95..bbc946d149582 100644
+--- a/drivers/reset/Kconfig
++++ b/drivers/reset/Kconfig
+@@ -167,6 +167,14 @@ config RESET_MESON_AUDIO_ARB
+ 	  This enables the reset driver for Audio Memory Arbiter of
+ 	  Amlogic's A113 based SoCs
+ 
++config RESET_MCHP_LAN966X_PHY
++	bool "Microchip lan966x phy reset driver"
++	depends on SOC_LAN966 || COMPILE_TEST
++	select MFD_SYSCON
++	help
++	  This driver supports the release of phy reset for the
++	  Microchip lan966x SoC.
++
+ config RESET_NPCM
+ 	bool "NPCM BMC Reset Driver" if COMPILE_TEST
+ 	default ARCH_NPCM
+diff --git a/drivers/reset/Makefile b/drivers/reset/Makefile
+index 4411a2a124d7d..4b6b1acac439d 100644
+--- a/drivers/reset/Makefile
++++ b/drivers/reset/Makefile
+@@ -21,6 +21,7 @@ obj-$(CONFIG_RESET_K210) += reset-k210.o
+ obj-$(CONFIG_RESET_LANTIQ) += reset-lantiq.o
+ obj-$(CONFIG_RESET_LPC18XX) += reset-lpc18xx.o
+ obj-$(CONFIG_RESET_MCHP_SPARX5) += reset-microchip-sparx5.o
++obj-$(CONFIG_RESET_MCHP_LAN966X_PHY) += reset-microchip-lan966x-phy-external.o
+ obj-$(CONFIG_RESET_MESON) += reset-meson.o
+ obj-$(CONFIG_RESET_MESON_AUDIO_ARB) += reset-meson-audio-arb.o
+ obj-$(CONFIG_RESET_NPCM) += reset-npcm.o
+diff --git a/drivers/reset/reset-microchip-lan966x-phy-external.c b/drivers/reset/reset-microchip-lan966x-phy-external.c
+new file mode 100644
+index 0000000000000..bc545ba785cfe
+--- /dev/null
++++ b/drivers/reset/reset-microchip-lan966x-phy-external.c
+@@ -0,0 +1,75 @@
++// SPDX-License-Identifier: GPL-2.0+
++#include <linux/gpio/consumer.h>
++#include <linux/of.h>
++#include <linux/of_device.h>
++#include <linux/io.h>
++#include <linux/module.h>
++#include <linux/platform_device.h>
++#include <linux/reset-controller.h>
++
++struct lan966x_phy_external_reset_context {
++	struct gpio_desc *external_phy_ctrl;
++	struct reset_controller_dev rcdev;
++};
++
++static int lan966x_phy_external_reset(struct reset_controller_dev *rcdev,
++				      unsigned long id)
++{
++	struct lan966x_phy_external_reset_context *ctx =
++		container_of(rcdev, struct lan966x_phy_external_reset_context, rcdev);
++
++	gpiod_direction_output(ctx->external_phy_ctrl, 1);
++	gpiod_set_value(ctx->external_phy_ctrl, 0);
++	gpiod_set_value(ctx->external_phy_ctrl, 1);
++	gpiod_set_value(ctx->external_phy_ctrl, 0);
++
++	return 0;
++}
++
++static const struct reset_control_ops lan966x_phy_external_reset_ops = {
++	.reset = lan966x_phy_external_reset,
++};
++
++static int lan966x_phy_external_reset_probe(struct platform_device *pdev)
++{
++	struct device_node *dn = pdev->dev.of_node;
++	struct lan966x_phy_external_reset_context *ctx;
++
++	ctx = devm_kzalloc(&pdev->dev, sizeof(*ctx), GFP_KERNEL);
++	if (!ctx)
++		return -ENOMEM;
++
++	ctx->external_phy_ctrl = devm_gpiod_get(&pdev->dev,
++						"phy-external-reset",
++						GPIOD_OUT_LOW);
++	if (IS_ERR(ctx->external_phy_ctrl))
++		return dev_err_probe(&pdev->dev, PTR_ERR(ctx->external_phy_ctrl),
++				     "Could not get reset GPIO\n");
++
++	ctx->rcdev.owner = THIS_MODULE;
++	ctx->rcdev.nr_resets = 1;
++	ctx->rcdev.ops = &lan966x_phy_external_reset_ops;
++	ctx->rcdev.of_node = dn;
++
++	return devm_reset_controller_register(&pdev->dev, &ctx->rcdev);
++}
++
++static const struct of_device_id lan966x_phy_external_reset_of_match[] = {
++	{ .compatible = "microchip,lan966x-phy-reset-external", },
++	{ }
++};
++MODULE_DEVICE_TABLE(of, lan966x_phy_external_reset_of_match);
++
++static struct platform_driver lan966x_phy_external_reset_driver = {
++	.probe = lan966x_phy_external_reset_probe,
++	.driver = {
++		.name = "lan966x-phy-reset-external",
++		.of_match_table = lan966x_phy_external_reset_of_match,
++	},
++};
++
++static int __init lan966x_phy_external_reset_init(void)
++{
++	return platform_driver_register(&lan966x_phy_external_reset_driver);
++}
++postcore_initcall(lan966x_phy_external_reset_init);
+-- 
+2.34.1
+

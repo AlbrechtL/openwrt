@@ -1,8 +1,10 @@
-From 666b0fd8135631f1d88110ac65ecb1181e0b7224 Mon Sep 17 00:00:00 2001
+From 4b05cd4cbd3f30bb2fa15b2e26d99aafbaa2231c Mon Sep 17 00:00:00 2001
 From: Horatiu Vultur <horatiu.vultur@microchip.com>
-Date: Tue, 2 Jan 2024 21:46:35 +0100
-Subject: [PATCH] net: mdio: mdio-mscc-mii: Add reset driver for the mdio bus
+Date: Wed, 16 Jul 2025 11:04:26 +0200
+Subject: [PATCH 2/3] net: mdio: mdio-mscc-mii: Add reset driver for the mdio
+ bus.
 
+Signed-off-by: Horatiu Vultur <horatiu.vultur@microchip.com>
 ---
  drivers/net/dsa/ocelot/seville_vsc9953.c |  2 +-
  drivers/net/mdio/mdio-mscc-miim.c        | 40 +++++++++++++++++++-----
@@ -10,7 +12,7 @@ Subject: [PATCH] net: mdio: mdio-mscc-mii: Add reset driver for the mdio bus
  3 files changed, 36 insertions(+), 9 deletions(-)
 
 diff --git a/drivers/net/dsa/ocelot/seville_vsc9953.c b/drivers/net/dsa/ocelot/seville_vsc9953.c
-index 70782649c395..09176d6c75d7 100644
+index 70782649c3957..09176d6c75d73 100644
 --- a/drivers/net/dsa/ocelot/seville_vsc9953.c
 +++ b/drivers/net/dsa/ocelot/seville_vsc9953.c
 @@ -895,7 +895,7 @@ static int vsc9953_mdio_bus_alloc(struct ocelot *ocelot)
@@ -23,7 +25,7 @@ index 70782649c395..09176d6c75d7 100644
  		dev_err(dev, "failed to setup MDIO bus\n");
  		return rc;
 diff --git a/drivers/net/mdio/mdio-mscc-miim.c b/drivers/net/mdio/mdio-mscc-miim.c
-index 62c47e0dd142..b1858c0d68a9 100644
+index 62c47e0dd1424..b1858c0d68a98 100644
 --- a/drivers/net/mdio/mdio-mscc-miim.c
 +++ b/drivers/net/mdio/mdio-mscc-miim.c
 @@ -48,6 +48,7 @@
@@ -135,7 +137,7 @@ index 62c47e0dd142..b1858c0d68a9 100644
  	{ }
  };
 diff --git a/include/linux/mdio/mdio-mscc-miim.h b/include/linux/mdio/mdio-mscc-miim.h
-index 1ce699740af6..efeed8e46e5b 100644
+index 1ce699740af63..efeed8e46e5be 100644
 --- a/include/linux/mdio/mdio-mscc-miim.h
 +++ b/include/linux/mdio/mdio-mscc-miim.h
 @@ -14,6 +14,7 @@
@@ -148,5 +150,5 @@ index 1ce699740af6..efeed8e46e5b 100644
  
  #endif
 -- 
-2.43.0
+2.34.1
 
