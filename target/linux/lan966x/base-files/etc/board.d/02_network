@@ -1,0 +1,16 @@
+
+. /lib/functions.sh
+. /lib/functions/uci-defaults.sh
+. /lib/functions/system.sh
+
+board=$(board_name)
+board_config_update
+
+
+ucidef_set_bridge_device switch
+ucidef_set_interface_lan "eth0 eth1 eth2 eth3 eth4 eth5 eth6 eth7"
+
+
+board_config_flush
+
+exit 0
