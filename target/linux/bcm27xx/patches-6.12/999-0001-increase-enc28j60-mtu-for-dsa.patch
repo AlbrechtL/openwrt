@@ -1,0 +1,22 @@
+--- a/drivers/net/ethernet/microchip/enc28j60.c
++++ b/drivers/net/ethernet/microchip/enc28j60.c
+@@ -1575,6 +1575,7 @@ static int enc28j60_probe(struct spi_dev
+ 	dev->netdev_ops = &enc28j60_netdev_ops;
+ 	dev->watchdog_timeo = TX_TIMEOUT;
+ 	dev->ethtool_ops = &enc28j60_ethtool_ops;
++	dev->max_mtu = 1508; /*  Increase max MTU by 8 bytes because DSA adds 8 bytes in my case (rtl8365 driver). */
+ 
+ 	enc28j60_lowpower(priv, true);
+ 
+--- a/drivers/net/ethernet/microchip/enc28j60_hw.h
++++ b/drivers/net/ethernet/microchip/enc28j60_hw.h
+@@ -302,7 +302,8 @@
+ #define RXEND_INIT		0x19FF
+ 
+ /* maximum ethernet frame length */
+-#define MAX_FRAMELEN		1518
++/* Increase max frame len by 8 bytes because DSA adds 8 bytes in my case (rtl8365 driver). Original value was 1518. */
++#define MAX_FRAMELEN		1526
+ 
+ /* Preferred half duplex: LEDA: Link status LEDB: Rx/Tx activity */
+ #define ENC28J60_LAMPS_MODE	0x3476

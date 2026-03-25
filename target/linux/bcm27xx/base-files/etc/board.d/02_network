@@ -32,6 +32,35 @@ raspberrypi,model-zero-w)
 	;;
 esac
 
+# ToDos
+# * Handle model-zero-w wlan0 device, see above
+# * Apply switch specific settings only when DSA
+# * Avoid hard-coded lan interface list, see below
+
+# The ENC28J60 doesn't have a fixed mac address. So we generate it from the serial number to make sure that each raspberry will get the same mac address
+mac_123="b8:27:eb" # Raspberry Pi OUI
+mac_456=$(awk '/Serial/ {print $3}' /proc/cpuinfo | sed 's/^.*\(..\)\(..\)\(..\)$/\1:\2:\3/') # Generate MAC from serial number
+lan_mac=$mac_123:$mac_456
+
+# Check for DSA
+if grep -sq DEVTYPE=dsa /sys/class/net/*/uevent; then 
+	# DSA is not up when running this script, so we use a hard coded list as workaround
+	#lan_list=$(ls -1 -v -d /sys/class/net/lan* | xargs -n1 basename | xargs)
+	lan_list="lan1 lan2 lan3 lan4"
+
+	ucidef_set_bridge_device switch
+	ucidef_set_interface_lan "$lan_list"
+
+	ucidef_set_interface_macaddr "lan" $lan_mac
+	ucidef_set_bridge_mac "$lan_mac"
+	ucidef_set_network_device_mac eth0 $lan_mac
+	[ -z "$lan_mac_start" ] && lan_mac_start=$lan_mac
+	for lan in $lan_list; do
+		ucidef_set_network_device_mac $lan $lan_mac_start
+		lan_mac_start=$(macaddr_add $lan_mac_start 1)
+	done
+fi
+
 board_config_flush
 
 exit 0
