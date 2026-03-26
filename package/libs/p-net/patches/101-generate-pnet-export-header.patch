@@ -1,0 +1,71 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -17,14 +17,14 @@
+ # --------------------------------------------------------------------
+ set(PNET_OPTION_FAST_STARTUP 0 CACHE STRING "Fast startup")
+ set(PNET_OPTION_PARAMETER_SERVER 0 CACHE STRING "Parameter server")
+-set(PNET_OPTION_IR 0 CACHE STRING "")
++set(PNET_OPTION_IR 1 CACHE STRING "")
+ set(PNET_OPTION_SR 0 CACHE STRING "")
+ set(PNET_OPTION_REDUNDANCY 0 CACHE STRING "")
+ set(PNET_OPTION_AR_VENDOR_BLOCKS 0 CACHE STRING "")
+ set(PNET_OPTION_RS 0 CACHE STRING "")
+ set(PNET_OPTION_MC_CR 0 CACHE STRING "")
+ set(PNET_OPTION_SRL 0 CACHE STRING "")
+-set(PNET_OPTION_SNMP 0 CACHE STRING "")
++set(PNET_OPTION_SNMP 1 CACHE STRING "")
+ set(PNET_OPTION_DRIVER_ENABLE 0 CACHE STRING "")
+ set(PNET_USE_ATOMICS 0 CACHE STRING "")
+ 
+@@ -51,7 +51,7 @@
+ set(PNET_MAX_PORT_DESCRIPTION_SIZE 256)
+ 
+ # Logging Variables
+-set(LOG_LEVEL ERR CACHE STRING "")
++set(LOG_LEVEL ERROR CACHE STRING "")
+ set(PF_ETH_LOG OFF CACHE STRING "")
+ set(PF_LLDP_LOG OFF CACHE STRING "")
+ set(PF_SNMP_LOG OFF CACHE STRING "")
+@@ -79,6 +79,14 @@
+     ${CMAKE_CURRENT_SOURCE_DIR}/pnet_version.h.in
+     ${CMAKE_CURRENT_BINARY_DIR}/include/pnet_version.h
+     @ONLY
++)
++
++# Export macro header used by public API headers.
++file(WRITE
++    ${CMAKE_CURRENT_BINARY_DIR}/include/pnet_export.h
++    "#ifndef PNET_EXPORT\n"
++    "#define PNET_EXPORT\n"
++    "#endif\n"
+ )
+ 
+ # --------------------------------------------------------------------
+@@ -117,12 +125,17 @@
+     "src/device/*.c"
+ )
+ 
+-add_library(profinet STATIC ${PNET_SOURCES})
++add_library(profinet SHARED ${PNET_SOURCES})
++set_target_properties(profinet PROPERTIES
++    OUTPUT_NAME pnet
++)
+ 
+ target_include_directories(profinet PUBLIC 
+     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
++    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/common>
++    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/device>
+ )
+ 
+ # Link OSAL to Profinet
+@@ -131,7 +144,7 @@
+ endif()
+ 
+ # --------------------------------------------------------------------
+-# 5. Install Target (To export scripts and binaries, as per README)
++# 5. Install target (export scripts and binaries)
+ # --------------------------------------------------------------------
+ include(GNUInstallDirs)
+ install(TARGETS profinet
