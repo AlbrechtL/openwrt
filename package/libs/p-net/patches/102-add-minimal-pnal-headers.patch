@@ -1,0 +1,56 @@
+diff --git a/include/pnal_config.h b/include/pnal_config.h
+new file mode 100644
+index 000000000..6f9218f8f
+--- /dev/null
++++ b/include/pnal_config.h
+@@ -0,0 +1,13 @@
++#ifndef PNAL_CONFIG_H
++#define PNAL_CONFIG_H
++
++#include "pnal_sys.h"
++
++/*
++ * Minimal PNAL configuration header for OpenWrt packaging.
++ *
++ * Upstream full platform ports provide a richer configuration file.
++ */
++
++#endif /* PNAL_CONFIG_H */
++
+diff --git a/include/pnal_sys.h b/include/pnal_sys.h
+new file mode 100644
+index 000000000..e3cb74c41
+--- /dev/null
++++ b/include/pnal_sys.h
+@@ -0,0 +1,31 @@
++#ifndef PNAL_SYS_H
++#define PNAL_SYS_H
++
++#include <stddef.h>
++#include <stdint.h>
++
++/*
++ * Minimal PNAL system types for OpenWrt packaging.
++ *
++ * Upstream full platform ports may use more elaborate definitions.
++ */
++
++typedef struct pnal_thread_cfg
++{
++   uint32_t prio;
++   size_t stack_size;
++} pnal_thread_cfg_t;
++
++typedef struct pnal_cfg
++{
++   pnal_thread_cfg_t bg_worker_thread;
++} pnal_cfg_t;
++
++typedef struct pnal_buf
++{
++   void * payload;
++   uint16_t len;
++} pnal_buf_t;
++
++#endif /* PNAL_SYS_H */
++

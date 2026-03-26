@@ -1,0 +1,28 @@
+diff --git a/src/linux/osal.c b/src/linux/osal.c
+index 9e0bc03..5178f68 100644
+--- a/src/linux/osal.c
++++ b/src/linux/osal.c
+@@ -98,9 +98,10 @@ os_mutex_t * os_mutex_create (void)
+       return NULL;
+    }
+ 
+-   CC_STATIC_ASSERT (_POSIX_THREAD_PRIO_INHERIT > 0);
+    pthread_mutexattr_init (&mattr);
++#if defined(_POSIX_THREAD_PRIO_INHERIT) && (_POSIX_THREAD_PRIO_INHERIT > 0)
+    pthread_mutexattr_setprotocol (&mattr, PTHREAD_PRIO_INHERIT);
++#endif
+    pthread_mutexattr_settype (&mattr, PTHREAD_MUTEX_RECURSIVE);
+ 
+    result = pthread_mutex_init (mutex, &mattr);
+@@ -555,7 +556,11 @@ os_timer_t * os_timer_create (
+    /* Create timer */
+    sev.sigev_notify            = SIGEV_THREAD_ID;
+    sev.sigev_value.sival_ptr   = timer;
++#if defined(__GLIBC__)
+    sev._sigev_un._tid          = timer->thread_id;
++#else
++   sev.sigev_notify_thread_id  = timer->thread_id;
++#endif
+    sev.sigev_signo             = SIGALRM;
+    sev.sigev_notify_attributes = NULL;
+ 
