@@ -35,7 +35,7 @@ The device is passwordless — never prompt for credentials or use `-i` key flag
 ## Common Patterns
 
 - **Check a UCI setting**: `ssh root@192.168.1.1 'uci show <config>'`
-- **List installed packages**: `ssh root@192.168.1.1 'opkg list-installed'`
+- **List installed packages**: `ssh root@192.168.1.1 'apk info'`
 - **Read system log**: `ssh root@192.168.1.1 'logread | tail -50'`
 - **Check network interfaces**: `ssh root@192.168.1.1 'ip addr'`
 - **Check firewall rules**: `ssh root@192.168.1.1 'nft list ruleset'`
