@@ -51,3 +51,58 @@ This removes both ingress and egress filters in one step.
 - Only one mirror destination per port is supported by the RTL83xx hardware.
 - The `clsact` qdisc supports both ingress and egress filtering; the older `ingress` qdisc only covers incoming traffic.
 - Configuration is not persistent — add the commands to `/etc/rc.local` or a procd init script to restore after reboot.
+
+---
+
+## UCI Support
+
+Port mirroring can also be configured persistently through `/etc/config/port-mirror`.
+
+Example UCI section:
+
+```uci
+config mirror 'lan2_to_lan8'
+	option enabled '1'
+	option source 'lan2'
+	option target 'lan8'
+	option ingress '1'
+	option egress '1'
+```
+
+Equivalent UCI commands:
+
+```sh
+uci set port-mirror.lan2_to_lan8=mirror
+uci set port-mirror.lan2_to_lan8.enabled='1'
+uci set port-mirror.lan2_to_lan8.source='lan2'
+uci set port-mirror.lan2_to_lan8.target='lan8'
+uci set port-mirror.lan2_to_lan8.ingress='1'
+uci set port-mirror.lan2_to_lan8.egress='1'
+uci commit port-mirror
+/etc/init.d/port-mirror reload
+```
+
+Disable the rule without deleting it:
+
+```sh
+uci set port-mirror.lan2_to_lan8.enabled='0'
+uci commit port-mirror
+/etc/init.d/port-mirror reload
+```
+
+Remove the rule completely:
+
+```sh
+uci delete port-mirror.lan2_to_lan8
+uci commit port-mirror
+/etc/init.d/port-mirror reload
+```
+
+Verify that the hardware offload is active:
+
+```sh
+tc -s filter show dev lan2 ingress
+tc -s filter show dev lan2 egress
+```
+
+Both configured directions should report `in_hw`.
