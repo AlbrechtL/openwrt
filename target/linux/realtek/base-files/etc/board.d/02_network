@@ -106,6 +106,7 @@ realtek_setup_macs()
 		lan_mac_start=$lan_mac
 		eth0_mac=$lan_mac
 		;;
+	albrecht,rtl8382mi-test|\
 	allnet,all-sg8208m|\
 	apresia,aplgs120gtss|\
 	d-link,dgs-1210-10mp-f|\

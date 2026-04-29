@@ -2,6 +2,25 @@
 
 include ./common.mk
 
+define Device/albrecht_rtl8382mi-test
+  $(Device/uimage-rt-loader)
+  SOC := rtl8382
+  DEVICE_COMPAT_VERSION := 1.0
+  DEVICE_VENDOR := Albrecht
+  DEVICE_MODEL := RTL8382MI-Test
+  IMAGE_SIZE := 13824k
+  UIMAGE_MAGIC := 0x83800000
+  KERNEL_INITRAMFS := \
+	kernel-bin | \
+	append-dtb | \
+	rt-compress | \
+	zyxel-vers | \
+	rt-loader | \
+	uImage none | \
+	check-size 6976k
+endef
+TARGET_DEVICES += albrecht_rtl8382mi-test
+
 define Device/allnet_all-sg8208m
   SOC := rtl8382
   IMAGE_SIZE := 7168k
