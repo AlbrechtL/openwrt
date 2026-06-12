@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# Realtek boards use this target-local override to prevent the failsafe button
+# from dropping the device into boot-time failsafe mode.
+exit 0

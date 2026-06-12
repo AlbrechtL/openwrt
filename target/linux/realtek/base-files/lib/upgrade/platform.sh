@@ -23,6 +23,22 @@ platform_check_image() {
 	return 0
 }
 
+platform_pre_upgrade() {
+	local led_path="/sys/kernel/debug/rtl838x/led"
+	local i
+
+	[ "$(board_name)" = "albrecht,rtl8382mi-test" ] || return 0
+
+	# Enable LED control by software
+	echo 0x0500ffff > "$led_path/led0_sw_p_en_ctrl" || return 0
+	echo 0x0500ffff > "$led_path/led1_sw_p_en_ctrl" || return 0
+
+	# Set all Ethernet LEDs to blinking state
+	for i in $(seq 0 15); do
+		echo 0x09 > "$led_path/led_sw_p_ctrl.$(printf '%02d' "$i")" || return 0
+	done
+}
+
 platform_do_upgrade() {
 	local board=$(board_name)
 

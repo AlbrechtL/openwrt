@@ -1,0 +1,3 @@
+#!/bin/sh
+logger -t BTN_2 "button event: BUTTON=$BUTTON ACTION=$ACTION SEEN=$SEEN TYPE=$TYPE"
+exit 0

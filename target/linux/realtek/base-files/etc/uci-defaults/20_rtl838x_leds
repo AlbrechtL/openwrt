@@ -1,0 +1,10 @@
+#!/bin/sh
+
+. /lib/functions.sh
+
+[ "$(board_name)" = "albrecht,rtl8382mi-test" ] || exit 0
+
+/etc/init.d/rtl838x_leds enable
+/etc/init.d/rtl838x_leds start
+
+exit 0
