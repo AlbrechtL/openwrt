@@ -1,0 +1,28 @@
+#!/bin/sh /etc/rc.common
+
+START=19
+STOP=89
+
+. /lib/functions.sh
+
+led_path="/sys/kernel/debug/rtl838x/led"
+
+start() {
+	# Enable LED control by hardware and set the default LED mode to "link/activity"
+	echo 0x2f396a3f > "$led_path/led_glb_ctrl" || return 0
+	echo 0x00001d00 > "$led_path/led_mode_ctrl" || return 0
+	echo 0x0500ffff > "$led_path/led_p_en_ctrl" || return 0
+}
+
+stop() {
+	local i
+
+	# Enable LED control by software
+	echo 0x0500ffff > "$led_path/led0_sw_p_en_ctrl" || return 0
+	echo 0x0500ffff > "$led_path/led1_sw_p_en_ctrl" || return 0
+
+	# Set all Ethernet LEDs to blinking state
+	for i in $(seq 0 15); do
+		echo 0x24 > "$led_path/led_sw_p_ctrl.$(printf '%02d' "$i")" || return 0
+	done
+}
