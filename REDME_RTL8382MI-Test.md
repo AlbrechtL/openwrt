@@ -192,3 +192,33 @@ cat /sys/kernel/debug/rtl838x/led/led1_sw_p_en_ctrl
 cat /sys/kernel/debug/rtl838x/led/led_sw_p_ctrl.01
 cat /sys/kernel/debug/rtl838x/led/led_sw_p_ctrl.16
 ```
+
+## Building
+
+### Compiling
+
+See https://openwrt.org/docs/guide-developer/toolchain/use-buildsystem for details.
+
+### Add switch features
+
+To add experimental switch realted features:
+
+1. Copy `feeds.conf.default` to `feeds.conf`
+2. Add feed to `feeds.conf`
+
+Example:
+
+```text
+src-git switch https://github.com/AlbrechtL/openwrt-switch-feed.git
+```
+
+3. Update and install feed packages
+
+From the OpenWrt root directory:
+
+```bash
+./scripts/feeds update switch
+./scripts/feeds install -a -p switch
+```
+
+4. run `menuconfig` and add needed function
