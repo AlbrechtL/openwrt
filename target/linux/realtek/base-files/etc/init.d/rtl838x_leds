@@ -12,6 +12,10 @@ start() {
 	echo 0x2f396a3f > "$led_path/led_glb_ctrl" || return 0
 	echo 0x00001d00 > "$led_path/led_mode_ctrl" || return 0
 	echo 0x0500ffff > "$led_path/led_p_en_ctrl" || return 0
+
+	# Disable software control
+	echo 0x00000000 > "$led_path/led0_sw_p_en_ctrl" || return 0
+	echo 0x00000000 > "$led_path/led1_sw_p_en_ctrl" || return 0
 }
 
 stop() {
