@@ -222,3 +222,40 @@ From the OpenWrt root directory:
 ```
 
 4. run `menuconfig` and add needed function
+
+## Default Features and Packages
+
+The `diffconfig.default` file contains the configuration for this device build and includes the following feature set:
+
+### Target Configuration
+- **Device**: RTL8382MI (Realtek RTL838x platform)
+- **Target**: `albrecht_rtl8382mi-test` (custom device profile)
+
+### VPN & Tunneling Support
+The build includes comprehensive VPN capabilities:
+
+- **OpenVPN** (mbed TLS variant)
+- **WireGuard** kernel module and tools for modern VPN tunneling
+
+### Network Management & Web Interface
+Complete LuCI web interface with:
+- Full admin control panel
+- Network configuration module
+- System status monitoring
+- IPv6, OpenVPN, PPP, and WireGuard protocol support
+- Bootstrap theme
+- Package manager integration
+- Firewall management
+- Port mirroring support
+- RSTP (Rapid Spanning Tree) support
+- PROFINET scanner application for network scanning
+
+
+### Other Utilities
+- **Fastfetch**: System information display utility
+
+### Build Configuration
+To use this configuration:
+1. Copy `diffconfig.default` to `.config`
+2. Run `make defconfig` or `make menuconfig` 
+3. Build with `make` to generate device images
